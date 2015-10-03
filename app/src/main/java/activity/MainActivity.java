@@ -1,5 +1,6 @@
 package activity;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -7,14 +8,29 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.example.nullnil.shoutout.R;
+
+import app.AppConfig;
+import app.AppController;
 import helper.SessionManager;
 import android.content.Intent;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends ActionBarActivity implements FragmentDrawer.FragmentDrawerListener {
 
@@ -24,6 +40,7 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
     private FragmentDrawer drawerFragment;
     private Button btnLogout;
     private SessionManager session;
+    private ProgressDialog pDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +58,7 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
 
             @Override
             public void onClick(View v) {
+
                 logoutUser();
             }
         });
@@ -127,11 +145,70 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
      * preferences Clears the user data from sqlite users table
      * */
     private void logoutUser() {
-        session.setLogin(false);
 
-        // Launching the login activity
-        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-        startActivity(intent);
-        finish();
+        final String token = session.getToken();
+
+        // Tag used to cancel the request
+        String tag_string_req = "req_logout";
+
+        //pDialog.setMessage("Loging out ...");
+        //showDialog();
+
+        StringRequest strReq = new StringRequest(Request.Method.POST,
+                AppConfig.URL_LOGOUT, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "Logout Response: " + response.toString());
+
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    int intError = jObj.getInt("error");
+                    boolean error = (intError > 0) ? true : false;
+                    if (!error) {
+                        session.setLogin(false);
+
+                        Toast.makeText(getApplicationContext(), "User logout completed. Please login now!", Toast.LENGTH_LONG).show();
+
+                        // Launching the login activity
+                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        startActivity(intent);
+                        finish();
+                    } else {
+
+                        // Error occurred in registration. Get the error
+                        // message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(getApplicationContext(),
+                                errorMsg, Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Logout Error: " + error.getMessage());
+                Toast.makeText(getApplicationContext(),
+                        error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() {
+                // Posting params to register url
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("token", token);
+
+                return params;
+            }
+
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 }
