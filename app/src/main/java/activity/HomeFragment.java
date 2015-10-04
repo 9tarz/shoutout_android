@@ -23,6 +23,7 @@ public class HomeFragment extends Fragment {
 
     MapView mapView;
     GoogleMap map;
+    LatLng position;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -49,14 +50,14 @@ public class HomeFragment extends Fragment {
 
 
         if (map != null) {
-
-
             map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
 
                 @Override
-                public void onMyLocationChange(Location arg0) {
-
-                    map.addMarker(new MarkerOptions().position(new LatLng(arg0.getLatitude(), arg0.getLongitude())).title("It's Me!"));
+                public void onMyLocationChange(Location location) {
+                    position = new LatLng(location.getLatitude(), location.getLongitude());
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 14);
+                    map.animateCamera(cameraUpdate);
+                    //map.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("It's Me!"));
                 }
             });
 
@@ -69,7 +70,7 @@ public class HomeFragment extends Fragment {
         }
 
         // Updates the location and zoom of the MapView
-        //CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()), 10);
+        //CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 10);
         //map.animateCamera(cameraUpdate);
 
         return rootView;
