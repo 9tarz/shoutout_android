@@ -3,6 +3,7 @@ package activity;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,13 +15,15 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.Circle;
 import android.location.Location;
 
 public class HomeFragment extends Fragment {
 
+    private static final String TAG = HomeFragment.class.getSimpleName();
     MapView mapView;
     GoogleMap map;
     LatLng position;
@@ -55,8 +58,11 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void onMyLocationChange(Location location) {
                     position = new LatLng(location.getLatitude(), location.getLongitude());
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 14);
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 15);
                     map.animateCamera(cameraUpdate);
+                    CircleOptions circleOptions = new CircleOptions().center(position).radius(1000) ; // In meters
+                    Circle circle = map.addCircle(circleOptions);
+                    Log.d(TAG, "Location: " + "Lat" + location.getLatitude() + "Long" +location.getLongitude() );
                     //map.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("It's Me!"));
                 }
             });
@@ -69,13 +75,7 @@ public class HomeFragment extends Fragment {
             e.printStackTrace();
         }
 
-        // Updates the location and zoom of the MapView
-        //CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 10);
-        //map.animateCamera(cameraUpdate);
-
         return rootView;
-        // Inflate the layout for this fragment
-        //return rootView;
     }
 
     /*@Override
