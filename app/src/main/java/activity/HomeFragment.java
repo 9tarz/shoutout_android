@@ -98,22 +98,17 @@ public class HomeFragment extends Fragment implements OnMapClickListener,OnMapRe
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         map.setMyLocationEnabled(true);
         map.setOnMapClickListener(this);
-
-        if (map != null) {
-            map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-
-                @Override
-                public void onMyLocationChange(Location location) {
-                    position = new LatLng(location.getLatitude(), location.getLongitude());
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 15);
-                    map.animateCamera(cameraUpdate);
-                    CircleOptions circleOptions = new CircleOptions().center(position).radius(1000).fillColor(Color.argb(4, 0, 255,0)); // In meters
-                    map.addCircle(circleOptions);
-                    Log.d(TAG, "Location: " + "Lat" + location.getLatitude() + "Long" +location.getLongitude() );
-                    //map.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("It's Me!"));
-                }
-            });
-
+        map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+        @Override
+        public void onMyLocationChange(Location location) {
+            position = new LatLng(location.getLatitude(), location.getLongitude());
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 15);
+            map.animateCamera(cameraUpdate);
+            CircleOptions circleOptions = new CircleOptions().center(position).radius(1000).fillColor(Color.argb(4, 0, 255,0)); // In meters
+            map.addCircle(circleOptions);
+            Log.d(TAG, "Location: " + "Lat" + location.getLatitude() + "Long" +location.getLongitude() );
+            //map.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("It's Me!"));
         }
+    });
     }
 }
