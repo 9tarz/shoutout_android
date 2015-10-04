@@ -20,8 +20,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.Circle;
 import android.location.Location;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
+import android.graphics.Color;
+import com.google.android.gms.maps.OnMapReadyCallback;
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements OnMapClickListener,OnMapReadyCallback {
 
     private static final String TAG = HomeFragment.class.getSimpleName();
     MapView mapView;
@@ -46,28 +49,7 @@ public class HomeFragment extends Fragment {
         mapView = (MapView) rootView.findViewById(R.id.mapview);
         mapView.onCreate(savedInstanceState);
         // Gets to GoogleMap from the MapView and does initialization stuff
-        map = mapView.getMap();
-        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        map.getUiSettings().setMyLocationButtonEnabled(true);
-        map.setMyLocationEnabled(true);
-
-
-        if (map != null) {
-            map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-
-                @Override
-                public void onMyLocationChange(Location location) {
-                    position = new LatLng(location.getLatitude(), location.getLongitude());
-                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 15);
-                    map.animateCamera(cameraUpdate);
-                    CircleOptions circleOptions = new CircleOptions().center(position).radius(1000) ; // In meters
-                    Circle circle = map.addCircle(circleOptions);
-                    Log.d(TAG, "Location: " + "Lat" + location.getLatitude() + "Long" +location.getLongitude() );
-                    //map.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("It's Me!"));
-                }
-            });
-
-        }
+        mapView.getMapAsync(this);
 
        try {
             MapsInitializer.initialize(this.getActivity());
@@ -82,6 +64,12 @@ public class HomeFragment extends Fragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
     }*/
+
+    @Override
+    public void onMapClick(LatLng point) {
+        //map.animateCamera(CameraUpdateFactory.newLatLng(point));
+        map.addMarker(new MarkerOptions().position(point).title("It's Me!"));
+    }
 
     @Override
     public void onDetach() {
@@ -102,5 +90,30 @@ public class HomeFragment extends Fragment {
     public void onLowMemory() {
         super.onLowMemory();
         mapView.onLowMemory();
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        map.setMyLocationEnabled(true);
+        map.setOnMapClickListener(this);
+
+        if (map != null) {
+            map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
+
+                @Override
+                public void onMyLocationChange(Location location) {
+                    position = new LatLng(location.getLatitude(), location.getLongitude());
+                    CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 15);
+                    map.animateCamera(cameraUpdate);
+                    CircleOptions circleOptions = new CircleOptions().center(position).radius(1000).fillColor(Color.argb(4, 0, 255,0)); // In meters
+                    map.addCircle(circleOptions);
+                    Log.d(TAG, "Location: " + "Lat" + location.getLatitude() + "Long" +location.getLongitude() );
+                    //map.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("It's Me!"));
+                }
+            });
+
+        }
     }
 }
