@@ -99,9 +99,15 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
     @Override
     public void onMapClick(LatLng point) {
-
+        float[] distance = new float[2];
         //map.animateCamera(CameraUpdateFactory.newLatLng(point));
-        map.addMarker(new MarkerOptions().position(point).title("It's Me!"));
+        location.distanceBetween(point.latitude, point.longitude, location.getLatitude(), location.getLongitude(), distance);
+        if( distance[0] > 1000 ){
+            Toast.makeText(this.getContext(), "Outside, distance from center: " + distance[0] + " radius: " + 1000, Toast.LENGTH_LONG).show();
+        } else {
+            map.addMarker(new MarkerOptions().position(point).title("It's Me!"));
+            Toast.makeText(this.getContext(), "Inside, distance from center: " + distance[0] + " radius: " + 1000 , Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
