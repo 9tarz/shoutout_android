@@ -16,6 +16,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.Circle;
 
 import android.location.Location;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
@@ -53,6 +54,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
     GoogleMap map;
     LatLng position;
     Location location;
+            Circle circleMap;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -181,7 +183,10 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
                 }
             }, ONE_MIN, TimeUnit.MILLISECONDS);
         }
-            handleNewLocation(this.location);
+            if(circleMap != null) {
+                circleMap.remove();
+            }
+        handleNewLocation(this.location);
     }
 
 
@@ -200,7 +205,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 15);
         map.animateCamera(cameraUpdate);
         CircleOptions circleOptions = new CircleOptions().center(position).radius(1000).fillColor(Color.argb(50, 0, 255, 0)); // In meters
-        map.addCircle(circleOptions);
+        circleMap = map.addCircle(circleOptions);
         map.moveCamera(CameraUpdateFactory.newLatLng(position));
     }
 
@@ -222,10 +227,11 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
     public void onLocationChanged(Location location) {
         if (null == this.location || location.getAccuracy() < this.location.getAccuracy()) {
             this.location = location;
+            circleMap.remove();
+            handleNewLocation(this.location);
             if (location.getAccuracy() < MINIMUM_ACCURACY) {
                 LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             }
         }
-        handleNewLocation(this.location);
     }
 }
