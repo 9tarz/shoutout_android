@@ -49,6 +49,10 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         btnLogout = (Button) findViewById(R.id.btnLogout);
+        // Progress dialog
+        pDialog = new ProgressDialog(this);
+        pDialog.setCancelable(false);
+        
         session = new SessionManager(getApplicationContext());
         if (!session.isLoggedIn()) {
             logoutUser();
@@ -151,8 +155,8 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
         // Tag used to cancel the request
         String tag_string_req = "req_logout";
 
-        //pDialog.setMessage("Loging out ...");
-        //showDialog();
+        pDialog.setMessage("Loging out ...");
+        showDialog();
 
         StringRequest strReq = new StringRequest(Request.Method.POST,
                 AppConfig.URL_LOGOUT, new Response.Listener<String>() {
@@ -160,6 +164,7 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
             @Override
             public void onResponse(String response) {
                 Log.d(TAG, "Logout Response: " + response.toString());
+                hideDialog();
 
                 try {
                     JSONObject jObj = new JSONObject(response);
@@ -210,5 +215,14 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
 
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
+    private void showDialog() {
+        if (!pDialog.isShowing())
+            pDialog.show();
+    }
+    private void hideDialog() {
+        if (pDialog.isShowing())
+            pDialog.dismiss();
     }
 }
