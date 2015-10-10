@@ -2,6 +2,7 @@ package activity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,8 +15,10 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.Circle;
 
 import android.location.Location;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
@@ -36,7 +39,8 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         OnMapReadyCallback,
         LocationListener,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener
+        GoogleApiClient.OnConnectionFailedListener,
+        GoogleMap.OnMarkerClickListener
         {
 
     private static final String TAG = HomeFragment.class.getSimpleName();
@@ -51,8 +55,10 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
     MapView mapView;
     GoogleMap map;
-    LatLng position;
+    LatLng position,position2;
     Location location;
+            Circle circleMap;
+
 
     public HomeFragment() {
         // Required empty public constructor
@@ -96,17 +102,39 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
     public void onAttach(Activity activity) {
         super.onAttach(activity);
     }*/
+    @Override
+    public boolean onMarkerClick(Marker marker) {
 
+        Fragment newFragment = new PostFragment();
+
+        Bundle bundle = new Bundle();
+        LatLng picklatlng =  marker.getPosition();
+        double[] latlong = {picklatlng.latitude,picklatlng.longitude};
+        bundle.putDoubleArray("picklatlong", latlong);
+        newFragment.setArguments(bundle);
+
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        // and add the transaction to the back stack
+        transaction.replace(R.id.container_body, newFragment);
+        transaction.addToBackStack(null);
+        // Commit the transaction
+        transaction.commit();
+
+        //move camera to marker
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(picklatlng, 15);
+        map.animateCamera(cameraUpdate);
+        return true;
+    }
     @Override
     public void onMapClick(LatLng point) {
         float[] distance = new float[2];
         //map.animateCamera(CameraUpdateFactory.newLatLng(point));
         location.distanceBetween(point.latitude, point.longitude, location.getLatitude(), location.getLongitude(), distance);
-        if( distance[0] > 1000 ){
+        if (distance[0] > 1000) {
             Toast.makeText(this.getContext(), "Outside, distance from center: " + distance[0] + " radius: " + 1000, Toast.LENGTH_LONG).show();
         } else {
             map.addMarker(new MarkerOptions().position(point).title("It's Me!"));
-            Toast.makeText(this.getContext(), "Inside, distance from center: " + distance[0] + " radius: " + 1000 , Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getContext(), "Inside, distance from center: " + distance[0] + " radius: " + 1000, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -145,12 +173,13 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        Location location;
         map = googleMap;
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         map.getUiSettings().setMyLocationButtonEnabled(true);
         map.setMyLocationEnabled(true);
         map.setOnMapClickListener(this);
-
+        map.setOnMarkerClickListener((GoogleMap.OnMarkerClickListener) this);
         /*map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
             @Override
             public void onMyLocationChange(Location location) {
@@ -181,7 +210,10 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
                 }
             }, ONE_MIN, TimeUnit.MILLISECONDS);
         }
-            handleNewLocation(this.location);
+        if(circleMap != null) {
+            circleMap.remove();
+        }
+        handleNewLocation(this.location);
     }
 
 
@@ -200,7 +232,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 15);
         map.animateCamera(cameraUpdate);
         CircleOptions circleOptions = new CircleOptions().center(position).radius(1000).fillColor(Color.argb(50, 0, 255, 0)); // In meters
-        map.addCircle(circleOptions);
+        circleMap = map.addCircle(circleOptions);
         map.moveCamera(CameraUpdateFactory.newLatLng(position));
     }
 
@@ -222,10 +254,11 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
     public void onLocationChanged(Location location) {
         if (null == this.location || location.getAccuracy() < this.location.getAccuracy()) {
             this.location = location;
+            circleMap.remove();
+            handleNewLocation(this.location);
             if (location.getAccuracy() < MINIMUM_ACCURACY) {
                 LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             }
         }
-        handleNewLocation(this.location);
     }
 }
