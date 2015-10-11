@@ -52,7 +52,7 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
         // Progress dialog
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
-        
+
         session = new SessionManager(getApplicationContext());
         if (!session.isLoggedIn()) {
             logoutUser();

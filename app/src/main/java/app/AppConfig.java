@@ -9,4 +9,6 @@ public class AppConfig {
 
     // Server user logout url
     public static String URL_LOGOUT = "http://www.sakkawa.com/api/user/logout";
+
+    public static String URL_GETAROUNDLOCATION = "http://www.sakkawa.com/api/user/pull";
 }

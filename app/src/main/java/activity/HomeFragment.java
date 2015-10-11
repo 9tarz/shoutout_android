@@ -6,6 +6,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.example.nullnil.shoutout.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.maps.GoogleMap;
@@ -22,6 +27,7 @@ import android.location.Location;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import android.graphics.Color;
 import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -30,12 +36,20 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+
+import com.google.android.gms.maps.LocationSource;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import app.AppConfig;
+import app.AppController;
 
 public class HomeFragment extends Fragment implements OnMapClickListener,
         OnMapReadyCallback,
         LocationListener,
+        LocationSource,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener
         {
@@ -44,19 +58,19 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
     private GoogleApiClient mGoogleApiClient;
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private LocationRequest mLocationRequest;
-    private static final long INTERVAL = 1000 * 30; // 30 sec
-    private static final long FASTEST_INTERVAL = 1000 * 5; // 5 sec
-    private static final long ONE_MIN = 1000 * 60;
-    private static final long REFRESH_TIME = ONE_MIN * 5;
+    private static final long INTERVAL = 1000;
+    private static final long FASTEST_INTERVAL = 1000;
     private static final float MINIMUM_ACCURACY = 50.0f;
+    private static final float RADIUS = 1000;
 
-    MapView mapView;
-    GoogleMap map;
-    LatLng position;
-    Location location;
-            Circle circleMap;
+    private MapView mapView;
+    private GoogleMap map;
+    private LatLng position;
+    private Location location;
+    private Circle circleMap;
+    private OnLocationChangedListener mapLocationListener = null;
 
-    public HomeFragment() {
+            public HomeFragment() {
         // Required empty public constructor
     }
 
@@ -71,9 +85,8 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(INTERVAL)        // 10 seconds, in milliseconds
-                .setFastestInterval(FASTEST_INTERVAL); // 1 second, in milliseconds
-
+                .setInterval(INTERVAL)
+                .setFastestInterval(FASTEST_INTERVAL);
     }
 
     @Override
@@ -93,22 +106,28 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
         return rootView;
     }
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+        map.setLocationSource(this);
+        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        map.getUiSettings().setMyLocationButtonEnabled(true);
+        map.setMyLocationEnabled(true);
+        map.setOnMapClickListener(this);
+        map.moveCamera(CameraUpdateFactory.zoomTo(15f));
+    }
 
-    /*@Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-    }*/
 
     @Override
     public void onMapClick(LatLng point) {
         float[] distance = new float[2];
         //map.animateCamera(CameraUpdateFactory.newLatLng(point));
         location.distanceBetween(point.latitude, point.longitude, location.getLatitude(), location.getLongitude(), distance);
-        if( distance[0] > 1000 ){
-            Toast.makeText(this.getContext(), "Outside, distance from center: " + distance[0] + " radius: " + 1000, Toast.LENGTH_LONG).show();
+        if( distance[0] > RADIUS ){
+            Toast.makeText(this.getContext(), "Outside, distance from center: " + distance[0] + " radius: " + RADIUS, Toast.LENGTH_LONG).show();
         } else {
             map.addMarker(new MarkerOptions().position(point).title("It's Me!"));
-            Toast.makeText(this.getContext(), "Inside, distance from center: " + distance[0] + " radius: " + 1000 , Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getContext(), "Inside, distance from center: " + distance[0] + " radius: " + RADIUS , Toast.LENGTH_LONG).show();
         }
     }
 
@@ -120,18 +139,21 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
     @Override
     public void onPause() {
         super.onPause();
+        map.setMyLocationEnabled(false);
         if (mGoogleApiClient.isConnected()) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient,  this);
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             mGoogleApiClient.disconnect();
         }
     }
 
     @Override
     public void onResume() {
-        mapView.onResume();
-        //setUpMapIfNeeded();
-        mGoogleApiClient.connect();
         super.onResume();
+        mGoogleApiClient.connect();
+        if (mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }
+        mapView.onResume();
     }
     @Override
     public void onDestroy() {
@@ -146,46 +168,17 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
-        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        map.getUiSettings().setMyLocationButtonEnabled(true);
-        map.setMyLocationEnabled(true);
-        map.setOnMapClickListener(this);
-
-        /*map.setOnMyLocationChangeListener(new GoogleMap.OnMyLocationChangeListener() {
-            @Override
-            public void onMyLocationChange(Location location) {
-                position = new LatLng(location.getLatitude(), location.getLongitude());
-                CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 15);
-                map.animateCamera(cameraUpdate);
-                CircleOptions circleOptions = new CircleOptions().center(position).radius(1000).fillColor(Color.argb(4, 0, 255, 0)); // In meters
-                map.addCircle(circleOptions);
-            Log.d(TAG, "Location: " + "Lat" + location.getLatitude() + "Long" +location.getLongitude() );
-            map.addMarker(new MarkerOptions().position(new LatLng(location.getLatitude(), location.getLongitude())).title("It's Me!"));
-        }
-    });*/
-    }
-
-    @Override
     public void onConnected(Bundle bundle) {
         Log.i(TAG, "Location services connected.");
-        Location currentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        if (currentLocation != null && currentLocation.getTime() > REFRESH_TIME) {
-            this.location = currentLocation;
-        }else {
+        Location lastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (lastLocation != null) {
+            this.location = lastLocation;
+        } else {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-            // Schedule a Thread to unregister location listeners
-            Executors.newScheduledThreadPool(1).schedule(new Runnable() {
-                @Override
-                public void run() {
-                    LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, HomeFragment.this);
-                }
-            }, ONE_MIN, TimeUnit.MILLISECONDS);
         }
-            if(circleMap != null) {
-                circleMap.remove();
-            }
+        if(circleMap != null) {
+            circleMap.remove();
+        }
         handleNewLocation(this.location);
     }
 
@@ -197,14 +190,22 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
 
     private void handleNewLocation(Location location) {
-        Log.d(TAG, location.toString());
-        Toast.makeText(this.getContext(),"Location Changed!", Toast.LENGTH_LONG).show();
-        double currentLatitude = location.getLatitude();
-        double currentLongitude = location.getLongitude();
+        if (location != null ) {
+            //Toast.makeText(this.getContext(),"Time:"+ location.getTime()+ " Provider:"+ location.getProvider() + " Accuracy:" + location.getAccuracy(), Toast.LENGTH_LONG).show();
+            Log.d(TAG, location.toString());
+            double currentLatitude = location.getLatitude();
+            double currentLongitude = location.getLongitude();
+            Toast.makeText(this.getContext(), "Location Changed! Lat:" + currentLatitude + " Long:" +currentLongitude, Toast.LENGTH_LONG).show();
+            //addCircleAndMoveCamera(currentLatitude, currentLongitude);
+            pullAroundLocation(currentLatitude, currentLongitude);
+        }
+    }
+
+    private void addCircleAndMoveCamera(double currentLatitude, double currentLongitude) {
         position = new LatLng(currentLatitude, currentLongitude);
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(position, 15);
         map.animateCamera(cameraUpdate);
-        CircleOptions circleOptions = new CircleOptions().center(position).radius(1000).fillColor(Color.argb(50, 0, 255, 0)); // In meters
+        CircleOptions circleOptions = new CircleOptions().center(position).radius(RADIUS).fillColor(Color.argb(50, 0, 255, 0)).strokeWidth(0f); // In meters
         circleMap = map.addCircle(circleOptions);
         map.moveCamera(CameraUpdateFactory.newLatLng(position));
     }
@@ -225,13 +226,86 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
     @Override
     public void onLocationChanged(Location location) {
-        if (null == this.location || location.getAccuracy() < this.location.getAccuracy()) {
+        if (this.mapLocationListener != null) {
+            this.mapLocationListener.onLocationChanged(location);
+        }
+        this.location = location;
+        handleNewLocation(this.location);
+        /*if (null == this.location || location.getAccuracy() < this.location.getAccuracy()) {
             this.location = location;
             circleMap.remove();
+            Toast.makeText(this.getContext(),":Provider:"+ location.getProvider() + "Accuracy:" + location.getAccuracy(), Toast.LENGTH_LONG).show();
             handleNewLocation(this.location);
             if (location.getAccuracy() < MINIMUM_ACCURACY) {
                 LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             }
-        }
+        }*/
+
+        map.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(this.location.getLatitude(), this.location.getLongitude())));
+    }
+    @Override
+    public void activate(OnLocationChangedListener listener) {
+        this.mapLocationListener = listener;
+    }
+
+    @Override
+    public void deactivate() {
+        this.mapLocationListener=null;
+    }
+
+    private void pullAroundLocation(final double latitude, final double longitude) {
+        map.clear();
+        // Tag used to cancel the request
+        String tag_string_req = "req_pulllocation";
+
+        String stringLatitude = String.valueOf(latitude);
+        String stringLongitude = String.valueOf(longitude);
+        StringRequest strReq = new StringRequest(Request.Method.GET,
+                AppConfig.URL_GETAROUNDLOCATION + "/" + stringLatitude + "/" + stringLongitude, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                Log.d(TAG, "pullLocation Response: " + response.toString());
+                try {
+                    JSONObject jObj = new JSONObject(response);
+                    int intError = jObj.getInt("error");
+                    boolean error = (intError > 0) ? true : false;
+                    // Check for error node in json
+                    if (!error) {
+                        JSONArray arr_post = jObj.getJSONArray("posts");
+                        addCircleAndMoveCamera(latitude, longitude);
+                        for (int i = 0; i < arr_post.length(); i++) {
+                            String jsonLatitude = arr_post.getJSONObject(i).getString("latitude");
+                            String jsonLongitude = arr_post.getJSONObject(i).getString("longitude");
+                            map.addMarker(new MarkerOptions().position(new LatLng(Double.parseDouble(jsonLatitude), Double.parseDouble(jsonLongitude)))
+                                    .title("LAT: " + jsonLatitude + " LONG:" + jsonLongitude));
+                            Log.i(TAG, "Lat:" + jsonLatitude + " Long: " + jsonLongitude);
+                        }
+                    } else {
+                        addCircleAndMoveCamera(latitude, longitude);
+                        // Error in login. Get the error message
+                        String errorMsg = jObj.getString("error_msg");
+                        Toast.makeText(HomeFragment.this.getContext(), errorMsg , Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    // JSON error
+                    e.printStackTrace();
+                    Toast.makeText(HomeFragment.this.getContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e(TAG, "Login Error: " + error.getMessage());
+                Toast.makeText(HomeFragment.this.getContext(),
+                       error.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        }) {
+        };
+
+        // Adding request to request queue
+        AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
     }
 }

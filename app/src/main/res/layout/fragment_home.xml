@@ -4,7 +4,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="info.androidhive.materialdesign.activity.HomeFragment">
+
     <com.google.android.gms.maps.MapView android:id="@+id/mapview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 </RelativeLayout>
