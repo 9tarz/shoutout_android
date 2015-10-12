@@ -4,14 +4,12 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 
@@ -28,7 +26,7 @@ import org.json.JSONObject;
 import app.AppConfig;
 import app.AppController;
 
-import helper.SwipeListAdapter;
+import adapter.SwipeListAdapter;
 import helper.Post;
 
 import java.util.ArrayList;
@@ -42,7 +40,7 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
     private double longitude;
     private SwipeRefreshLayout swipeContainer;
     private RecyclerView recyclerView;
-    private ListView listView;
+    //private ListView listView;
     private SwipeListAdapter adapter;
     private List<Post> postList;
 
@@ -71,17 +69,21 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_post, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_timeline, container, false);
         swipeContainer = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeContainer);
         swipeContainer.setOnRefreshListener(this);
         swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
                 android.R.color.holo_green_light,
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
-        listView = (ListView) rootView.findViewById(R.id.recyclerView);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
         postList = new ArrayList<>();
         adapter = new SwipeListAdapter(this.getActivity(), postList);
-        listView.setAdapter(adapter);
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(adapter);
+
         swipeContainer.setOnRefreshListener(this);
         swipeContainer.post(new Runnable() {
                                 @Override
@@ -91,18 +93,7 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                                 }
                             }
         );
-
-        /*TextView latitude = (TextView)myFragmentView.findViewById(R.id.latitude);
-        TextView longitude = (TextView)myFragmentView.findViewById(R.id.longtidude);
-        latitude.setText("latitude"+Double.toString(latitude));
-        longitude.setText("longitude"+Double.toString(longitude));
-        */
         return rootView;
-    }
-
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
     }
 
     @Override

@@ -3,12 +3,11 @@ package adapter;
 /**
  * Created by nullnil on 10/12/15.
  */
-import android.app.Activity;
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import java.util.List;
@@ -17,26 +16,30 @@ import com.example.nullnil.shoutout.R;
 
 import helper.Post;
 
-public class SwipeListAdapter extends BaseAdapter {
-    private Activity activity;
-    private LayoutInflater inflater;
+public class SwipeListAdapter extends RecyclerView.Adapter<SwipeListAdapter.ViewHolder> {
+
     private List<Post> postList;
-    private String[] bgColors;
+    private Context mContext;
 
-    public SwipeListAdapter(Activity activity, List<Post> postList) {
-        this.activity = activity;
+    public SwipeListAdapter(Context context, List<Post> postList) {
+        this.mContext = context;
         this.postList = postList;
-        bgColors = activity.getApplicationContext().getResources().getStringArray(R.array.posts_bg);
+    }
+
+
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(mContext).inflate(R.layout.list_row,parent,false);
+
+        ViewHolder viewHolder = new ViewHolder(view);
+
+        return viewHolder;
     }
 
     @Override
-    public int getCount() {
-        return postList.size();
-    }
-
-    @Override
-    public Object getItem(int location) {
-        return postList.get(location);
+    public void onBindViewHolder(ViewHolder holder, int position) {
+        Post post = postList.get(position);
+        holder.text.setText(post.text);
     }
 
     @Override
@@ -45,21 +48,17 @@ public class SwipeListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public int getItemCount() {
+        return postList.size();
+    }
 
-        if (inflater == null)
-            inflater = (LayoutInflater) activity
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (convertView == null)
-            convertView = inflater.inflate(R.layout.list_row, null);
+    class ViewHolder extends RecyclerView.ViewHolder {
+        public TextView text;
 
-        TextView text = (TextView) convertView.findViewById(R.id.text);
-
-        text.setText(postList.get(position).text);
-
-        String color = bgColors[position % bgColors.length];
-
-        return convertView;
+        public ViewHolder(View itemView) {
+            super(itemView);
+            text = (TextView) itemView.findViewById(R.id.text);
+        }
     }
 
 }
