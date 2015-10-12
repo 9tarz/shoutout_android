@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -19,15 +20,16 @@ import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.Circle;
+import android.support.v4.app.FragmentTransaction;
 
 import android.location.Location;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import android.graphics.Color;
 import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -51,7 +53,8 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         LocationListener,
         LocationSource,
         GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener
+        GoogleApiClient.OnConnectionFailedListener,
+        GoogleMap.OnMarkerClickListener
         {
 
     private static final String TAG = HomeFragment.class.getSimpleName();
@@ -115,6 +118,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         map.setMyLocationEnabled(true);
         map.setOnMapClickListener(this);
         map.moveCamera(CameraUpdateFactory.zoomTo(15f));
+        map.setOnMarkerClickListener(this);
     }
 
 
@@ -139,7 +143,6 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
     @Override
     public void onPause() {
         super.onPause();
-        map.setMyLocationEnabled(false);
         if (mGoogleApiClient.isConnected()) {
             LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
             mGoogleApiClient.disconnect();
@@ -298,7 +301,9 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "Login Error: " + error.getMessage());
+                NetworkResponse response = error.networkResponse;
+                Log.d("status error code: ",""+response.data);
+                Log.e(TAG, "pullLocation Error: " + error.getMessage());
                 Toast.makeText(HomeFragment.this.getContext(),
                        error.getMessage(), Toast.LENGTH_LONG).show();
             }
@@ -307,5 +312,28 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
         // Adding request to request queue
         AppController.getInstance().addToRequestQueue(strReq, tag_string_req);
+    }
+
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+
+        Fragment newFragment = new TimeLineFragment();
+        Bundle bundle = new Bundle();
+        LatLng pickLatLng =  marker.getPosition();
+        double[] LatLong = {pickLatLng.latitude,pickLatLng.longitude};
+        bundle.putDoubleArray("pickLatLng", LatLong);
+        newFragment.setArguments(bundle);
+
+        FragmentTransaction transaction = getFragmentManager().beginTransaction();
+        // and add the transaction to the back stack
+        transaction.replace(R.id.container_body, newFragment);
+        transaction.addToBackStack(null);
+        // Commit the transaction
+        transaction.commit();
+
+        //move camera to marker
+        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(pickLatLng, 15);
+        map.animateCamera(cameraUpdate);
+        return true;
     }
 }

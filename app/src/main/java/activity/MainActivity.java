@@ -126,8 +126,8 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
                 title = getString(R.string.title_friends);
                 break;
             /*case 2:
-                fragment = new MessagesFragment();
-                title = getString(R.string.title_messages);
+                fragment = new PostFragment();
+                title = getString(R.string.title_post);
                 break;*/
             default:
                 break;

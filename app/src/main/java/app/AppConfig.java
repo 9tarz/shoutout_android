@@ -11,4 +11,6 @@ public class AppConfig {
     public static String URL_LOGOUT = "http://www.sakkawa.com/api/user/logout";
 
     public static String URL_GETAROUNDLOCATION = "http://www.sakkawa.com/api/user/pull";
+
+    public static String URL_FETCHPOSTS = "http://www.sakkawa.com/api/post/location";
 }
