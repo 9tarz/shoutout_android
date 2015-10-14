@@ -29,7 +29,7 @@ public class SwipeListAdapter extends RecyclerView.Adapter<SwipeListAdapter.View
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.list_row,parent,false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.list_row, parent, false);
 
         ViewHolder viewHolder = new ViewHolder(view);
 
@@ -40,6 +40,7 @@ public class SwipeListAdapter extends RecyclerView.Adapter<SwipeListAdapter.View
     public void onBindViewHolder(ViewHolder holder, int position) {
         Post post = postList.get(position);
         holder.text.setText(post.text);
+        holder.username.setText(post.username);
     }
 
     @Override
@@ -54,10 +55,12 @@ public class SwipeListAdapter extends RecyclerView.Adapter<SwipeListAdapter.View
 
     class ViewHolder extends RecyclerView.ViewHolder {
         public TextView text;
+        public TextView username;
 
         public ViewHolder(View itemView) {
             super(itemView);
             text = (TextView) itemView.findViewById(R.id.text);
+            username = (TextView) itemView.findViewById(R.id.username);
         }
     }
 

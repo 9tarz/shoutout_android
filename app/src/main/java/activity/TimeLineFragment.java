@@ -1,6 +1,5 @@
 package activity;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -81,7 +80,11 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
         adapter = new SwipeListAdapter(this.getActivity(), postList);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
+
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
         recyclerView.setHasFixedSize(true);
+
         recyclerView.setAdapter(adapter);
 
         swipeContainer.setOnRefreshListener(this);
@@ -122,9 +125,11 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                     if (!error) {
                         JSONArray arr_post = jObj.getJSONArray("posts");
                         for (int i = 0; i < arr_post.length(); i++) {
+                            String postUsername = arr_post.getJSONObject(i).getString("username");
                             String postText = arr_post.getJSONObject(i).getString("text");
+                            Log.i(TAG, "username:" +postUsername);
                             Log.i(TAG, "Text:" +postText);
-                            Post p = new Post(postText);
+                            Post p = new Post(postText,postUsername);
 
                             postList.add(0, p);
                         }

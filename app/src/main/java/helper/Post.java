@@ -5,11 +5,13 @@ package helper;
  */
 public class Post {
     public String text;
+    public String username;
 
     public Post() {
     }
 
-    public Post(String text) {
+    public Post(String text, String username) {
         this.text = text;
+        this.username = username;
     }
 }
