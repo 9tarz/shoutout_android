@@ -114,7 +114,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         map = googleMap;
         map.setLocationSource(this);
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        map.getUiSettings().setMyLocationButtonEnabled(true);
+        //map.getUiSettings().setMyLocationButtonEnabled(true);
         map.setMyLocationEnabled(true);
         map.setOnMapClickListener(this);
         map.moveCamera(CameraUpdateFactory.zoomTo(15f));
