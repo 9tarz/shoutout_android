@@ -2,6 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="16dp">
 
     <ImageView
@@ -27,5 +28,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="14dp" />
+
+    <com.github.curioustechizen.ago.RelativeTimeTextView
+        android:id="@+id/timestamp"
+        android:layout_below="@+id/text"
+        android:layout_marginLeft="10dp"
+        android:layout_toRightOf="@+id/username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:relative_time_prefix="" />
 
 </RelativeLayout>

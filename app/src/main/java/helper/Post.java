@@ -6,12 +6,14 @@ package helper;
 public class Post {
     public String text;
     public String username;
+    public long timestamp;
 
     public Post() {
     }
 
-    public Post(String text, String username) {
+    public Post(String text, String username, long timestamp) {
         this.text = text;
         this.username = username;
+        this.timestamp = timestamp;
     }
 }

@@ -28,8 +28,11 @@ import app.AppController;
 import adapter.SwipeListAdapter;
 import helper.Post;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -127,9 +130,25 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                         for (int i = 0; i < arr_post.length(); i++) {
                             String postUsername = arr_post.getJSONObject(i).getString("username");
                             String postText = arr_post.getJSONObject(i).getString("text");
-                            Log.i(TAG, "username:" +postUsername);
+                            String postTimestamp = arr_post.getJSONObject(i).getString("created_at");
+                            long timestamp;
+                            Date dateTimestamp = null;
+                            try {
+                                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                                df.setTimeZone(TimeZone.getTimeZone("GMT-04:00"));
+                                dateTimestamp = df.parse(postTimestamp);
+                                df.setTimeZone(TimeZone.getTimeZone("GMT+07:00"));
+                                String strGMT7 = df.format(dateTimestamp);
+                                dateTimestamp = df.parse(strGMT7);
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            timestamp = dateTimestamp.getTime();
+                            Log.i(TAG, "Username:" +postUsername);
                             Log.i(TAG, "Text:" +postText);
-                            Post p = new Post(postText,postUsername);
+                            Log.i(TAG, "Timestamp:" +postTimestamp);
+                            Post p = new Post(postText,postUsername, timestamp);
 
                             postList.add(0, p);
                         }
@@ -152,7 +171,7 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e(TAG, "pullLocation Error: " + error.getMessage());
+                Log.e(TAG, "fetchPosts Error: " + error.getMessage());
                 Toast.makeText(TimeLineFragment.this.getContext(),
                         error.getMessage(), Toast.LENGTH_LONG).show();
                 swipeContainer.setRefreshing(false);

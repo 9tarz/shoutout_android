@@ -13,6 +13,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import com.example.nullnil.shoutout.R;
+import com.github.curioustechizen.ago.RelativeTimeTextView;
 
 import helper.Post;
 
@@ -41,6 +42,7 @@ public class SwipeListAdapter extends RecyclerView.Adapter<SwipeListAdapter.View
         Post post = postList.get(position);
         holder.text.setText(post.text);
         holder.username.setText(post.username);
+        holder.timestamp.setReferenceTime(post.timestamp);
     }
 
     @Override
@@ -56,11 +58,13 @@ public class SwipeListAdapter extends RecyclerView.Adapter<SwipeListAdapter.View
     class ViewHolder extends RecyclerView.ViewHolder {
         public TextView text;
         public TextView username;
+        public RelativeTimeTextView timestamp;
 
         public ViewHolder(View itemView) {
             super(itemView);
             text = (TextView) itemView.findViewById(R.id.text);
             username = (TextView) itemView.findViewById(R.id.username);
+            timestamp = (RelativeTimeTextView) itemView.findViewById(R.id.timestamp);
         }
     }
 
