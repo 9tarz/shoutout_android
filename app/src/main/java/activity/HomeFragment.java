@@ -268,7 +268,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
             @Override
             public void onResponse(String response) {
-                Log.d(TAG, "pullLocation Response: " + response.toString());
+                Log.d(TAG, "pullLocation Response: " + response);
                 try {
                     JSONObject jObj = new JSONObject(response);
                     int intError = jObj.getInt("error");
@@ -301,8 +301,6 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
             @Override
             public void onErrorResponse(VolleyError error) {
-                NetworkResponse response = error.networkResponse;
-                Log.d("status error code: ",""+response.data);
                 Log.e(TAG, "pullLocation Error: " + error.getMessage());
                 Toast.makeText(HomeFragment.this.getContext(),
                        error.getMessage(), Toast.LENGTH_LONG).show();
