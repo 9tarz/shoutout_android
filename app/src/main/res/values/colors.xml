@@ -34,6 +34,7 @@
     <color name="aluminum">#999999</color>
     <color name="base">#AAAAAA</color>
     <color name="iron">#CCCCCC</color>
+
     <string-array name="posts_bg">
         <item>#24c6d5</item>
         <item>#57dd86</item>

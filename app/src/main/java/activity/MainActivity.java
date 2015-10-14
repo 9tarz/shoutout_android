@@ -48,7 +48,7 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
         setContentView(R.layout.activity_main);
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        btnLogout = (Button) findViewById(R.id.btnLogout);
+        //btnLogout = (Button) findViewById(R.id.btnLogout);
         // Progress dialog
         pDialog = new ProgressDialog(this);
         pDialog.setCancelable(false);
@@ -58,14 +58,14 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
             logoutUser();
         }
         // Logout button click event
-        btnLogout.setOnClickListener(new View.OnClickListener() {
+        /*btnLogout.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
 
                 logoutUser();
             }
-        });
+        }); */
 
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -96,12 +96,13 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        /*if (id == R.id.action_logout) {
             return true;
-        }
+        }*/
 
-        if(id == R.id.action_search){
-            Toast.makeText(getApplicationContext(), "Search action is selected!", Toast.LENGTH_SHORT).show();
+        if(id == R.id.action_logout){
+            logoutUser();
+            //Toast.makeText(getApplicationContext(), "Search action is selected!", Toast.LENGTH_SHORT).show();
             return true;
         }
 
