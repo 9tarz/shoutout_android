@@ -201,7 +201,7 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                         Toast.makeText(TimeLineFragment.this.getContext(), errorMsg, Toast.LENGTH_LONG).show();
                     }
                     swipeContainer.setRefreshing(false);
-                    Toast.makeText(TimeLineFragment.this.getContext(), "Update Completed", Toast.LENGTH_LONG).show();
+                    //Toast.makeText(TimeLineFragment.this.getContext(), "Update Completed", Toast.LENGTH_LONG).show();
                 } catch (JSONException e) {
                     // JSON error
                     e.printStackTrace();

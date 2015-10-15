@@ -19,6 +19,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -128,10 +129,10 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         //map.animateCamera(CameraUpdateFactory.newLatLng(point));
         location.distanceBetween(point.latitude, point.longitude, location.getLatitude(), location.getLongitude(), distance);
         if( distance[0] > RADIUS ){
-            Toast.makeText(this.getContext(), "Outside, distance from center: " + distance[0] + " radius: " + RADIUS, Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getContext(), "Out of Area!", Toast.LENGTH_LONG).show();
         } else {
-            map.addMarker(new MarkerOptions().position(point).title("It's Me!"));
-            Toast.makeText(this.getContext(), "Inside, distance from center: " + distance[0] + " radius: " + RADIUS , Toast.LENGTH_LONG).show();
+            map.addMarker(new MarkerOptions().position(point));
+            //Toast.makeText(this.getContext(), "Inside, distance from center: " + distance[0] + " radius: " + RADIUS , Toast.LENGTH_LONG).show();
         }
     }
 
@@ -198,7 +199,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
             Log.d(TAG, location.toString());
             double currentLatitude = location.getLatitude();
             double currentLongitude = location.getLongitude();
-            Toast.makeText(this.getContext(), "Location Changed! Lat:" + currentLatitude + " Long:" +currentLongitude, Toast.LENGTH_LONG).show();
+            //Toast.makeText(this.getContext(), "Location Changed! Lat:" + currentLatitude + " Long:" +currentLongitude, Toast.LENGTH_LONG).show();
             //addCircleAndMoveCamera(currentLatitude, currentLongitude);
             pullAroundLocation(currentLatitude, currentLongitude);
         }
@@ -211,6 +212,8 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         CircleOptions circleOptions = new CircleOptions().center(position).radius(RADIUS).fillColor(Color.argb(50, 0, 255, 0)).strokeWidth(0f); // In meters
         circleMap = map.addCircle(circleOptions);
         map.moveCamera(CameraUpdateFactory.newLatLng(position));
+        map.addMarker(new MarkerOptions().position(position).title("Current Location").icon(BitmapDescriptorFactory
+                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
     }
 
     @Override
