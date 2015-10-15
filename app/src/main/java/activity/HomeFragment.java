@@ -1,5 +1,6 @@
 package activity;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -192,7 +193,6 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         Log.i(TAG, "Location services suspended. Please reconnect.");
     }
 
-
     private void handleNewLocation(Location location) {
         if (location != null ) {
             //Toast.makeText(this.getContext(),"Time:"+ location.getTime()+ " Provider:"+ location.getProvider() + " Accuracy:" + location.getAccuracy(), Toast.LENGTH_LONG).show();
@@ -212,8 +212,10 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         CircleOptions circleOptions = new CircleOptions().center(position).radius(RADIUS).fillColor(Color.argb(50, 0, 255, 0)).strokeWidth(0f); // In meters
         circleMap = map.addCircle(circleOptions);
         map.moveCamera(CameraUpdateFactory.newLatLng(position));
+        String path = "@drawable/SV.png";
         map.addMarker(new MarkerOptions().position(position).title("Current Location").icon(BitmapDescriptorFactory
-                .defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                .fromResource(R.drawable.sv3)));
+
     }
 
     @Override
