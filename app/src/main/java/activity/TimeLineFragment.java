@@ -1,6 +1,7 @@
 package activity;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -103,7 +104,7 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                             }
         );
 
-        buttonPost = (Button) rootView.findViewById(R.id.button_Post);
+        /*buttonPost = (Button) rootView.findViewById(R.id.button_Post);
         buttonPost.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
@@ -120,6 +121,24 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                 transaction.commit();
             }
 
+        });*/
+        FloatingActionButton btnFab = (FloatingActionButton) rootView.findViewById(R.id.button_post);
+        btnFab.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Fragment nextFragment = new PostFragment();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                transaction.replace(R.id.container_body, nextFragment);
+                transaction.addToBackStack(null);
+                // pick location
+                Bundle bundle = new Bundle();
+                double[] LatLong = {latitude, longitude};
+                bundle.putDoubleArray("pickLatLng", LatLong);
+                nextFragment.setArguments(bundle);
+                // goo
+                transaction.commit();
+            }
         });
 
         return rootView;
