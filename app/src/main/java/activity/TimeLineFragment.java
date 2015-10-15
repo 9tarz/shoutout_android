@@ -35,7 +35,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -198,14 +197,14 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                     } else {
                         // Error in login. Get the error message
                         String errorMsg = jObj.getString("error_msg");
-                        Toast.makeText(TimeLineFragment.this.getContext(), errorMsg, Toast.LENGTH_LONG).show();
+                        Toast.makeText(TimeLineFragment.this.getContext(), errorMsg, Toast.LENGTH_SHORT).show();
                     }
                     swipeContainer.setRefreshing(false);
                     //Toast.makeText(TimeLineFragment.this.getContext(), "Update Completed", Toast.LENGTH_LONG).show();
                 } catch (JSONException e) {
                     // JSON error
                     e.printStackTrace();
-                    Toast.makeText(TimeLineFragment.this.getContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(TimeLineFragment.this.getContext(), "Json error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -215,7 +214,7 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, "fetchPosts Error: " + error.getMessage());
                 Toast.makeText(TimeLineFragment.this.getContext(),
-                        error.getMessage(), Toast.LENGTH_LONG).show();
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
                 swipeContainer.setRefreshing(false);
             }
         }) {

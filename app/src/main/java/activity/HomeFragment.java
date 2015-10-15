@@ -129,7 +129,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         //map.animateCamera(CameraUpdateFactory.newLatLng(point));
         location.distanceBetween(point.latitude, point.longitude, location.getLatitude(), location.getLongitude(), distance);
         if( distance[0] > RADIUS ){
-            Toast.makeText(this.getContext(), "Out of Area!", Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getContext(), "Out of Area!", Toast.LENGTH_SHORT).show();
         } else {
             map.addMarker(new MarkerOptions().position(point));
             //Toast.makeText(this.getContext(), "Inside, distance from center: " + distance[0] + " radius: " + RADIUS , Toast.LENGTH_LONG).show();
@@ -291,12 +291,12 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
                         addCircleAndMoveCamera(latitude, longitude);
                         // Error in login. Get the error message
                         String errorMsg = jObj.getString("error_msg");
-                        Toast.makeText(HomeFragment.this.getContext(), errorMsg , Toast.LENGTH_LONG).show();
+                        Toast.makeText(HomeFragment.this.getContext(), errorMsg , Toast.LENGTH_SHORT).show();
                     }
                 } catch (JSONException e) {
                     // JSON error
                     e.printStackTrace();
-                    Toast.makeText(HomeFragment.this.getContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(HomeFragment.this.getContext(), "Json error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -306,7 +306,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, "pullLocation Error: " + error.getMessage());
                 Toast.makeText(HomeFragment.this.getContext(),
-                       error.getMessage(), Toast.LENGTH_LONG).show();
+                       error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }) {
         };

@@ -186,7 +186,7 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
                         // message
                         String errorMsg = jObj.getString("error_msg");
                         Toast.makeText(getApplicationContext(),
-                                errorMsg, Toast.LENGTH_LONG).show();
+                                errorMsg, Toast.LENGTH_SHORT).show();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -199,7 +199,7 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
             public void onErrorResponse(VolleyError error) {
                 Log.e(TAG, "Logout Error: " + error.getMessage());
                 Toast.makeText(getApplicationContext(),
-                        error.getMessage(), Toast.LENGTH_LONG).show();
+                        error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         }) {
 

@@ -96,12 +96,12 @@ public class PostFragment extends Fragment {
                                 // Error in login. Get the error message
                                 String errorMsg = jObj.getString("error_msg");
                                 Toast.makeText(PostFragment.this.getContext(),
-                                        errorMsg, Toast.LENGTH_LONG).show();
+                                        errorMsg, Toast.LENGTH_SHORT).show();
                             }
                         } catch (JSONException e) {
                             // JSON error
                             e.printStackTrace();
-                            Toast.makeText(PostFragment.this.getContext(), "Json error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(PostFragment.this.getContext(), "Json error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
 
                     }
@@ -111,7 +111,7 @@ public class PostFragment extends Fragment {
                     public void onErrorResponse(VolleyError error) {
                         //Log.e(TAG, "Login Error: " + error.getMessage());
                         Toast.makeText(PostFragment.this.getContext(),
-                                error.getMessage(), Toast.LENGTH_LONG).show();
+                                error.getMessage(), Toast.LENGTH_SHORT).show();
                         hideDialog();
                     }
                 }) {
