@@ -1,0 +1,20 @@
+<!-- res/layout-v21/fragment_crime_list.xml -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <include layout="@android:layout/list_content"/>
+
+    <ImageButton
+        android:id="@+id/add_button"
+        android:layout_width="@dimen/diameter"
+        android:layout_height="@dimen/diameter"
+        android:layout_gravity="end|bottom"
+        android:layout_marginBottom="@dimen/add_button_margin"
+        android:layout_marginEnd="@dimen/add_button_margin"
+        android:tint="@android:color/white"
+        android:background="#26ae90"
+        android:elevation="@dimen/elevation_low"
+        android:src="@android:drawable/ic_input_add"/>
+
+</FrameLayout>

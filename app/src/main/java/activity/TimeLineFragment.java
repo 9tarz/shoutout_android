@@ -1,8 +1,9 @@
 package activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,8 +11,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
-
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -31,6 +34,12 @@ import helper.Post;
 
 import java.util.ArrayList;
 import java.util.List;
+import com.example.nullnil.shoutout.R;
+import com.google.android.gms.maps.model.LatLng;
+import android.os.Build;
+import android.graphics.Outline;
+import android.view.ViewOutlineProvider;
+import android.annotation.TargetApi;
 
 public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
@@ -43,7 +52,7 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
     //private ListView listView;
     private SwipeListAdapter adapter;
     private List<Post> postList;
-
+    private Button buttonPost ;
 
     public TimeLineFragment() {
         // Required empty public constructor
@@ -57,6 +66,8 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
         // in case you want not array value
         latitude = LatLong[0];
         longitude = LatLong[1];
+
+
     }
 
     @Override
@@ -64,12 +75,58 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
         fetchPosts(latitude,longitude);
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_timeline, container, false);
+        // ========== button post SHOUT ===========//
+            // FAB
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            rootView = inflater.inflate(R.layout.fragment_crime_list, container, false);
+        } else {
+            rootView = super.onCreateView(inflater, container, savedInstanceState);
+        }
+        View addButton = rootView.findViewById(R.id.add_button);
+        addButton.setOutlineProvider(new ViewOutlineProvider() {
+            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void getOutline(View view, Outline outline) {
+                int diameter = getResources().getDimensionPixelSize(R.dimen.diameter);
+                outline.setOval(0, 0, diameter, diameter);
+            }
+        });
+        addButton.setClipToOutline(true);
+
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick " + "CLICKKK");
+            }
+        });*/
+            // end FAB
+        buttonPost = (Button) rootView.findViewById(R.id.button_Post);
+        buttonPost.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View view) {
+                Fragment nextFragment = new postDataFragment();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                transaction.replace(R.id.container_body, nextFragment);
+                transaction.addToBackStack(null);
+                // pick location
+                Bundle bundle = new Bundle();
+                double[] LatLong = {latitude,longitude};
+                bundle.putDoubleArray("pickLatLng", LatLong);
+                nextFragment.setArguments(bundle);
+                // goo
+                transaction.commit();
+            }
+
+        });
+
+        // ============== end ==================//
         swipeContainer = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeContainer);
         swipeContainer.setOnRefreshListener(this);
         swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,

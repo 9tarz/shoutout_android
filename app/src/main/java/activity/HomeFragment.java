@@ -1,5 +1,6 @@
 package activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -47,6 +48,7 @@ import org.json.JSONObject;
 
 import app.AppConfig;
 import app.AppController;
+import android.content.Intent;
 
 public class HomeFragment extends Fragment implements OnMapClickListener,
         OnMapReadyCallback,
@@ -80,6 +82,8 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
         mGoogleApiClient = new GoogleApiClient.Builder(this.getActivity())
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
@@ -124,6 +128,8 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
     @Override
     public void onMapClick(LatLng point) {
+
+
         float[] distance = new float[2];
         //map.animateCamera(CameraUpdateFactory.newLatLng(point));
         location.distanceBetween(point.latitude, point.longitude, location.getLatitude(), location.getLongitude(), distance);
@@ -316,7 +322,6 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-
         Fragment newFragment = new TimeLineFragment();
         Bundle bundle = new Bundle();
         LatLng pickLatLng =  marker.getPosition();

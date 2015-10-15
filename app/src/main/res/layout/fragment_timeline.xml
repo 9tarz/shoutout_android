@@ -12,7 +12,29 @@
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:onClick="postData" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="POST"
+        android:id="@+id/button_Post"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:nestedScrollingEnabled="true" />
+    <!-- FAB TEST
+    <ImageButton
+        android:id="@+id/add_button"
+        android:layout_width="@dimen/diameter"
+        android:layout_height="@dimen/diameter"
+        android:layout_gravity="end|bottom"
+        android:layout_marginBottom="@dimen/add_button_margin"
+        android:layout_marginEnd="@dimen/add_button_margin"
+        android:tint="@android:color/white"
+        android:background="#26ae90"
+        android:elevation="@dimen/elevation_low"
+        android:src="@android:drawable/ic_input_add"/> -->
 </RelativeLayout>

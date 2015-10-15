@@ -3,6 +3,7 @@ package app;
 public class AppConfig {
     // Server user login url
     public static String URL_LOGIN = "http://www.sakkawa.com/api/user/login";
+    public static String URL_POST = "http://www.sakkawa.com/api/post/shout";
 
     // Server user register url
     public static String URL_REGISTER = "http://www.sakkawa.com/api/user/register";

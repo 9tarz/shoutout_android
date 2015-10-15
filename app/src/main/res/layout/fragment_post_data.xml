@@ -1,0 +1,40 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="info.androidhive.materialdesign.activity.PostFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+
+
+    <EditText
+        android:id="@+id/editText_postText"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:hint="What about you today guys !?"
+        android:padding="10dp"
+        android:singleLine="true"
+        android:inputType="textCapWords"
+        android:textColor="@color/input_register"
+        android:textColorHint="@color/input_register_hint"
+        android:layout_marginTop="120dp"
+        android:background="#c1ffff"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+
+    <Button
+        android:id="@+id/button_shout"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/btn_login_bg"
+        android:text="SHOUT"
+        android:textColor="@color/btn_login"
+        android:layout_below="@+id/editText_postText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="85dp"
+        android:nestedScrollingEnabled="false" />
+
+</RelativeLayout>
