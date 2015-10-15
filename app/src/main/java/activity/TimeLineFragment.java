@@ -2,6 +2,7 @@ package activity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -9,6 +10,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 
@@ -45,6 +47,7 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
     //private ListView listView;
     private SwipeListAdapter adapter;
     private List<Post> postList;
+    private Button buttonPost ;
 
 
     public TimeLineFragment() {
@@ -99,6 +102,26 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                                 }
                             }
         );
+
+        buttonPost = (Button) rootView.findViewById(R.id.button_Post);
+        buttonPost.setOnClickListener(new View.OnClickListener() {
+
+            public void onClick(View view) {
+                Fragment nextFragment = new PostFragment();
+                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                transaction.replace(R.id.container_body, nextFragment);
+                transaction.addToBackStack(null);
+                // pick location
+                Bundle bundle = new Bundle();
+                double[] LatLong = {latitude, longitude};
+                bundle.putDoubleArray("pickLatLng", LatLong);
+                nextFragment.setArguments(bundle);
+                // goo
+                transaction.commit();
+            }
+
+        });
+
         return rootView;
     }
 
@@ -135,11 +158,11 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                             Date dateTimestamp = null;
                             try {
                                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                                df.setTimeZone(TimeZone.getTimeZone("GMT-04:00"));
+                                //df.setTimeZone(TimeZone.getTimeZone("GMT-04:00"));
                                 dateTimestamp = df.parse(postTimestamp);
-                                df.setTimeZone(TimeZone.getTimeZone("GMT+07:00"));
-                                String strGMT7 = df.format(dateTimestamp);
-                                dateTimestamp = df.parse(strGMT7);
+                                //df.setTimeZone(TimeZone.getTimeZone("GMT+07:00"));
+                                //String strGMT7 = df.format(dateTimestamp);
+                                //dateTimestamp = df.parse(strGMT7);
 
                             } catch (Exception e) {
                                 e.printStackTrace();
