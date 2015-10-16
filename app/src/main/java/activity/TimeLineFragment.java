@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
 
@@ -44,10 +43,8 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
     private double longitude;
     private SwipeRefreshLayout swipeContainer;
     private RecyclerView recyclerView;
-    //private ListView listView;
     private SwipeListAdapter adapter;
     private List<Post> postList;
-    private Button buttonPost ;
 
 
     public TimeLineFragment() {
@@ -93,7 +90,6 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
 
         recyclerView.setAdapter(adapter);
 
-        swipeContainer.setOnRefreshListener(this);
         swipeContainer.post(new Runnable() {
                                 @Override
                                 public void run() {
@@ -103,24 +99,6 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                             }
         );
 
-        /*buttonPost = (Button) rootView.findViewById(R.id.button_Post);
-        buttonPost.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View view) {
-                Fragment nextFragment = new PostFragment();
-                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                transaction.replace(R.id.container_body, nextFragment);
-                transaction.addToBackStack(null);
-                // pick location
-                Bundle bundle = new Bundle();
-                double[] LatLong = {latitude, longitude};
-                bundle.putDoubleArray("pickLatLng", LatLong);
-                nextFragment.setArguments(bundle);
-                // goo
-                transaction.commit();
-            }
-
-        });*/
         FloatingActionButton btnFab = (FloatingActionButton) rootView.findViewById(R.id.button_post);
         btnFab.setOnClickListener(new View.OnClickListener() {
 
@@ -149,7 +127,6 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
     }
     private void fetchPosts(final double latitude, final double longitude) {
 
-        swipeContainer.setRefreshing(true);
         postList.clear();
         String tag_string_req = "req_fetchPosts";
 

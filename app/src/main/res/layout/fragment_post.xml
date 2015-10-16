@@ -11,44 +11,51 @@
         android:id="@+id/editText_postText"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="What about you today guys !?"
+        android:hint="What's on yout mind ?"
         android:padding="10dp"
-        android:singleLine="true"
-        android:inputType="textCapWords"
         android:textColor="@color/black"
-        android:textColorHint="@color/base"
-        android:layout_marginTop="120dp"
-        android:background="#c1ffff"
+        android:textColorHint="#cfcfcf"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp">
-        <EditText
-            android:id="@+id/username"
-            android:layout_width="match_parent"
+        android:layout_alignParentStart="true"
+        android:maxLength="140"
+        android:layout_marginTop="15dp" />
+    <!--
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:inputType="textVisiblePassword|textNoSuggestions"
-            android:hint="@string/hint_username" />
-    </android.support.design.widget.TextInputLayout>
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+            <EditText
+                android:id="@+id/username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:inputType="textVisiblePassword|textNoSuggestions"
+                android:hint="@string/hint_username" />
+        </android.support.design.widget.TextInputLayout>
+        -->
 
 
     <Button
         android:id="@+id/button_shout"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="@color/base"
         android:text="SHOUT"
-        android:textColor="@color/colorPrimaryDark"
-        android:layout_below="@+id/editText_postText"
+        android:textColor="#ffffff"
+        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="85dp"
-        android:nestedScrollingEnabled="false" />
+        android:layout_alignParentStart="false"
+        android:background="@color/colorPrimary" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="140"
+        android:layout_marginTop="5dp"
+        android:layout_marginRight="5dp"
+        android:id="@+id/count"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
 
 </RelativeLayout>

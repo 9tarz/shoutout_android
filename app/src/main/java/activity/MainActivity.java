@@ -174,7 +174,7 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
                     if (!error) {
                         session.setLogin(false);
 
-                        Toast.makeText(getApplicationContext(), "User logout completed. Please login now!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getApplicationContext(), "User logout completed. Please login now!", Toast.LENGTH_SHORT).show();
 
                         // Launching the login activity
                         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
