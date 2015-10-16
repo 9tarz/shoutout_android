@@ -11,7 +11,7 @@
         android:id="@+id/editText_postText"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="What's on yout mind ?"
+        android:hint="What's on your mind ?"
         android:padding="10dp"
         android:textColor="@color/black"
         android:textColorHint="#cfcfcf"
