@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.support.v4.app.FragmentTransaction;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -30,6 +31,8 @@ import java.util.Map;
 import app.AppConfig;
 import app.AppController;
 import helper.SessionManager;
+import android.text.TextWatcher;
+import android.text.Editable;
 
 
 public class PostFragment extends Fragment {
@@ -40,6 +43,9 @@ public class PostFragment extends Fragment {
     private SessionManager session;
     private ProgressDialog dialog , pDialog;
     private double latitude , longitude ;
+    private TextView countWords;
+    private String count ;
+    private int checkCounts ;
 
     public PostFragment() {
         // Required empty public constructor
@@ -52,16 +58,39 @@ public class PostFragment extends Fragment {
         latitude = bundle.getDoubleArray("pickLatLng")[0];
         longitude = bundle.getDoubleArray("pickLatLng")[1];
 
+
     }
 
-    public void onClick (View view){
-        Log.d(TAG, "onClick : " + "YES");
-    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView =  inflater.inflate(R.layout.fragment_post, container, false);
         text = (EditText) rootView.findViewById(R.id.editText_postText);
+        countWords = (TextView) rootView.findViewById(R.id.count);
+        // ================ defect character ================//
+        text.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                checkCounts = 140-text.getText().length();
+                count = String.valueOf(checkCounts);
+                countWords.setText(count);
+                // TODO Auto-generated method stub
+            }
+        });
+        Log.d(TAG, "count : "+"");
+        // ================================================== //
         buttonShout = (Button) rootView.findViewById(R.id.button_shout);
         buttonShout.setOnClickListener(new View.OnClickListener() {
 
@@ -90,8 +119,7 @@ public class PostFragment extends Fragment {
                                 transaction.addToBackStack(null);
                                 transaction.commit();
 
-                            }
-                            else {
+                            } else {
 
                                 // Error in login. Get the error message
                                 String errorMsg = jObj.getString("error_msg");
@@ -127,10 +155,10 @@ public class PostFragment extends Fragment {
 
                         // Posting parameters to login url
                         Map<String, String> params = new HashMap<String, String>();
-                        params.put("token",token ); // token
-                        params.put("text", text.getText().toString() ); // text
-                        params.put("longitude", String.format("%.6f",longitude) ); // logitude
-                        params.put("latitude",  String.format("%.6f", latitude) ); // latitude
+                        params.put("token", token); // token
+                        params.put("text", text.getText().toString()); // text
+                        params.put("longitude", String.format("%.6f", longitude)); // logitude
+                        params.put("latitude", String.format("%.6f", latitude)); // latitude
 
                         return params;
                     }
@@ -143,6 +171,8 @@ public class PostFragment extends Fragment {
         });
         return rootView ;
     }
+
+
     private void showDialog() {
         if (!pDialog.isShowing())
             pDialog.show();
