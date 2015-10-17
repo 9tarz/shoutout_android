@@ -10,7 +10,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginRight="10dp"
-        android:src="@drawable/ic_profile"/>
+        android:src="@mipmap/ic_launcher"/>
 
     <TextView
         android:id="@+id/text"
