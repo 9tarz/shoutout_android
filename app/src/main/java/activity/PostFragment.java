@@ -120,10 +120,14 @@ public class PostFragment extends Fragment {
                             if (!error) {
                                 Toast.makeText(PostFragment.this.getContext(),
                                         "Complete SHOUT !", Toast.LENGTH_SHORT).show();
-                                Fragment backFragment = new HomeFragment();
+                                Fragment backFragment = new TimeLineFragment();
                                 FragmentTransaction transaction = getFragmentManager().beginTransaction();
                                 transaction.replace(R.id.container_body, backFragment);
                                 transaction.addToBackStack(null);
+                                Bundle bundle = new Bundle();
+                                double[] LatLong = {latitude, longitude};
+                                bundle.putDoubleArray("pickLatLng", LatLong);
+                                backFragment.setArguments(bundle);
                                 transaction.commit();
 
                             } else {
