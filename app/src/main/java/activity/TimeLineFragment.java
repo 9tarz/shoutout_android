@@ -103,10 +103,10 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                                 @Override
                                 public void run() {
                                     swipeContainer.setRefreshing(true);
-                                    fetchPosts(latitude, longitude);
                                 }
                             }
         );
+        fetchPosts(latitude, longitude);
 
         FloatingActionButton btnFab = (FloatingActionButton) rootView.findViewById(R.id.button_post);
         btnFab.setOnClickListener(new View.OnClickListener() {
