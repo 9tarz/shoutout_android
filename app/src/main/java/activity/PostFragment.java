@@ -66,6 +66,7 @@ public class PostFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView =  inflater.inflate(R.layout.fragment_post, container, false);
         text = (EditText) rootView.findViewById(R.id.editText_postText);
+        buttonShout.setEnabled(false);
         countWords = (TextView) rootView.findViewById(R.id.count);
         // ================ defect character ================//
         text.addTextChangedListener(new TextWatcher() {
