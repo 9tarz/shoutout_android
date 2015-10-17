@@ -83,7 +83,13 @@ public class PostFragment extends Fragment {
 
             @Override
             public void afterTextChanged(Editable s) {
-                checkCounts = 140-text.getText().length();
+                checkCounts = 140 - text.getText().length();
+                if (checkCounts == 140) {
+                    buttonShout.setEnabled(false);
+                }
+                else{
+                    buttonShout.setEnabled(true);
+                }
                 count = String.valueOf(checkCounts);
                 countWords.setText(count);
                 // TODO Auto-generated method stub
