@@ -122,10 +122,10 @@ public class MainActivity extends ActionBarActivity implements FragmentDrawer.Fr
                 fragment = new HomeFragment();
                 title = getString(R.string.title_home);
                 break;
-            /*case 1:
+            case 1:
                 fragment = new FriendsFragment();
                 title = getString(R.string.title_friends);
-                break; */
+                break;
             /*case 2:
                 fragment = new PostFragment();
                 title = getString(R.string.title_post);

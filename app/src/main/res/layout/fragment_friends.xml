@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:textSize="45dp"
-        android:text="FRIENDS"
+        android:text="PROFILE"
         android:textStyle="bold"/>
 
     <TextView
@@ -25,6 +25,6 @@
         android:textSize="12dp"
         android:layout_marginTop="10dp"
         android:gravity="center_horizontal"
-        android:text="Edit fragment_home.xml to change the appearance" />
+        android:text="coming soon..." />
 
 </RelativeLayout>
