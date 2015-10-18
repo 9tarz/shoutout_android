@@ -6,6 +6,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -124,6 +125,7 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                 nextFragment.setArguments(bundle);
                 // goo
                 transaction.commit();
+                ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle("Shout");
             }
         });
 
@@ -216,6 +218,7 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
     @Override
     public void onResume() {
         super.onResume();
+        ((ActionBarActivity) this.getActivity()).getSupportActionBar().setTitle("Timeline");
     }
     @Override
     public void onDestroy() {

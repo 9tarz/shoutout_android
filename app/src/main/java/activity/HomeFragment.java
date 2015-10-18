@@ -2,6 +2,7 @@ package activity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +27,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.Circle;
 import android.support.v4.app.FragmentTransaction;
+
 
 import android.location.Location;
 import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
@@ -153,6 +155,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
     @Override
     public void onResume() {
         super.onResume();
+        ((ActionBarActivity) this.getActivity()).getSupportActionBar().setTitle("Look Around");
         mGoogleApiClient.connect();
         if (mGoogleApiClient.isConnected()) {
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
@@ -331,6 +334,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         transaction.addToBackStack(null);
         // Commit the transaction
         transaction.commit();
+        ((ActionBarActivity) this.getActivity()).getSupportActionBar().setTitle("Timeline");
 
         //move camera to marker
         CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(pickLatLng, 15);
