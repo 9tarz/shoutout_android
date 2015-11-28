@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.app.FragmentTransaction;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,6 +48,8 @@ public class PostFragment extends Fragment {
     private TextView countWords;
     private String count ;
     private int checkCounts ;
+    private CheckBox isAnonymous;
+    private int is_anonymous;
 
     public PostFragment() {
         // Required empty public constructor
@@ -59,7 +62,6 @@ public class PostFragment extends Fragment {
         latitude = bundle.getDoubleArray("pickLatLng")[0];
         longitude = bundle.getDoubleArray("pickLatLng")[1];
 
-
     }
 
     @Override
@@ -70,6 +72,7 @@ public class PostFragment extends Fragment {
         buttonShout = (Button) rootView.findViewById(R.id.button_shout);
         buttonShout.setEnabled(false);
         countWords = (TextView) rootView.findViewById(R.id.count);
+        isAnonymous = (CheckBox) rootView.findViewById(R.id.checkBox);
         // ================ defect character ================//
         text.addTextChangedListener(new TextWatcher() {
             @Override
@@ -106,6 +109,7 @@ public class PostFragment extends Fragment {
                 session = new SessionManager(PostFragment.this.getContext());
                 final String token = session.getToken();
                 String tag = "req_post";
+                is_anonymous = (isAnonymous.isChecked()) ? 1 : 0;
 
                 StringRequest strReqPost = new StringRequest(Request.Method.POST,
                         AppConfig.URL_POST, new Response.Listener<String>() {
@@ -163,14 +167,16 @@ public class PostFragment extends Fragment {
                         Log.d(TAG, "text : " + text.getText().toString());
                         Log.d(TAG, "latitude : " + Double.toString(latitude));
                         Log.d(TAG, "longitude : " + Double.toString(longitude));
+                        Log.d(TAG, "is anonymous : " + Integer.toString(is_anonymous));
                         //
 
-                        // Posting parameters to login url
+                        // Posting parameters to post url
                         Map<String, String> params = new HashMap<String, String>();
                         params.put("token", token); // token
                         params.put("text", text.getText().toString()); // text
                         params.put("longitude", String.format("%.6f", longitude)); // logitude
                         params.put("latitude", String.format("%.6f", latitude)); // latitude
+                        params.put("is_anonymous", Integer.toString(is_anonymous));
 
                         return params;
                     }
