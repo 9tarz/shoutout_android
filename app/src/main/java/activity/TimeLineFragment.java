@@ -22,6 +22,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.example.nullnil.shoutout.R;
+import com.facebook.drawee.backends.pipeline.Fresco;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -81,6 +82,7 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                              ViewGroup container,
                              Bundle savedInstanceState) {
 
+        Fresco.initialize(this.getContext());
         View rootView = inflater.inflate(R.layout.fragment_timeline, container, false);
         swipeContainer = (SwipeRefreshLayout) rootView.findViewById(R.id.swipeContainer);
         swipeContainer.setOnRefreshListener(this);
@@ -160,6 +162,7 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                             String postUsername = arr_post.getJSONObject(i).getString("username");
                             String postText = arr_post.getJSONObject(i).getString("text");
                             String postTimestamp = arr_post.getJSONObject(i).getString("created_at");
+                            String postImageURL = arr_post.getJSONObject(i).getString("image_url");
                             long timestamp;
                             Date dateTimestamp = null;
                             try {
@@ -177,7 +180,8 @@ public class TimeLineFragment extends Fragment implements SwipeRefreshLayout.OnR
                             Log.i(TAG, "Username:" +postUsername);
                             Log.i(TAG, "Text:" +postText);
                             Log.i(TAG, "Timestamp:" +postTimestamp);
-                            Post p = new Post(postText,postUsername, timestamp);
+                            Log.i(TAG, "Image url:" + postImageURL);
+                            Post p = new Post(postText,postUsername, timestamp, postImageURL);
 
                             postList.add(0, p);
                         }
