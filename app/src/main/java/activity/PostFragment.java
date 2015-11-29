@@ -110,6 +110,9 @@ public class PostFragment extends Fragment {
         countWords = (TextView) rootView.findViewById(R.id.count);
         isAnonymous = (CheckBox) rootView.findViewById(R.id.checkBox);
 
+        pDialog = new ProgressDialog(PostFragment.this.getContext());
+        pDialog.setCancelable(false);
+
         // ==================== camera =====================
         imgPreview = (ImageView) rootView.findViewById(R.id.imgPreview);
         btnCapturePicture = (Button) rootView.findViewById(R.id.btnCapturePicture);
@@ -169,6 +172,7 @@ public class PostFragment extends Fragment {
                 session = new SessionManager(PostFragment.this.getContext());
                 final String token = session.getToken();
                 String tag = "req_post";
+
                 is_anonymous = (isAnonymous.isChecked()) ? 1 : 0;
 
                 BitmapFactory.Options options = new BitmapFactory.Options();
@@ -181,6 +185,7 @@ public class PostFragment extends Fragment {
                 byte[] fileImage = null;
 
                 if (fileUri != null) {
+                    pDialog.setMessage("Uploading image ...");
                     Bitmap bitmap = BitmapFactory.decodeFile(fileUri.getPath(), options);
 
                     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -188,6 +193,10 @@ public class PostFragment extends Fragment {
                     fileImage = byteArrayOutputStream.toByteArray();
                     has_image = true;
                 }
+                else {
+                    pDialog.setMessage("Shouting out ...");
+                }
+                showDialog();
 
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 DataOutputStream dos = new DataOutputStream(bos);
@@ -220,7 +229,7 @@ public class PostFragment extends Fragment {
                 MultipartRequest multipartRequest = new MultipartRequest(AppConfig.URL_POST, null, mimeType, multipartBody, new Response.Listener<NetworkResponse>() {
                     @Override
                     public void onResponse(NetworkResponse response) {
-
+                        hideDialog();
                         try {
                             String jsonString = new String(response.data);
 
@@ -259,6 +268,7 @@ public class PostFragment extends Fragment {
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        hideDialog();
                         Toast.makeText(PostFragment.this.getContext(), "Upload failed!\r\n" + error.toString(), Toast.LENGTH_SHORT).show();
                     }
                 });
