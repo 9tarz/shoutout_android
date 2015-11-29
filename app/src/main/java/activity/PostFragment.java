@@ -34,6 +34,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.example.nullnil.shoutout.R;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.interfaces.DraweeController;
+import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,6 +90,7 @@ public class PostFragment extends Fragment {
     private final String boundary = "apiclient-" + System.currentTimeMillis();
     private final String mimeType = "multipart/form-data;boundary=" + boundary;
     private byte[] multipartBody;
+    private SimpleDraweeView previewImage;
 
 
     public PostFragment() {
@@ -114,7 +120,8 @@ public class PostFragment extends Fragment {
         pDialog.setCancelable(false);
 
         // ==================== camera =====================
-        imgPreview = (ImageView) rootView.findViewById(R.id.imgPreview);
+        //imgPreview = (ImageView) rootView.findViewById(R.id.imgPreview);
+        previewImage = (SimpleDraweeView) rootView.findViewById(R.id.imgPreview);
         btnCapturePicture = (Button) rootView.findViewById(R.id.btnCapturePicture);
         btnCapturePicture.setOnClickListener(new View.OnClickListener() {
 
@@ -469,7 +476,8 @@ public class PostFragment extends Fragment {
         fileUri = savedInstanceState.getParcelable("file_uri");
     }
     */
-    private void previewCapturedImage() {
+
+    /*private void previewCapturedImage() {
         try {
             // hide video preview
             //videoPreview.setVisibility(View.GONE);
@@ -490,7 +498,17 @@ public class PostFragment extends Fragment {
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
+    }*/
+
+    private void previewCapturedImage() {
+        try {
+            previewImage.setVisibility(View.VISIBLE);
+            previewImage.setImageURI(fileUri);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

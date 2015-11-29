@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     tools:context="info.androidhive.materialdesign.activity.PostFragment">
 
     <!-- TODO: Update blank fragment layout -->
@@ -78,10 +79,19 @@
         android:layout_marginTop="15dp"
         android:textSize="30dp" />
 
-    <ImageView
+    <!--<ImageView
         android:layout_width="350dp"
         android:layout_height="350dp"
         android:id="@+id/imgPreview"
+        android:layout_above="@+id/button_shout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="48dp" /> -->
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:id="@+id/imgPreview"
+        fresco:fadeDuration="300"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
         android:layout_above="@+id/button_shout"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="48dp" />
