@@ -53,6 +53,7 @@ public class SwipeListAdapter extends RecyclerView.Adapter<SwipeListAdapter.View
         if (!post.image_url.equals("null")) {
             ImageRequest request = ImageRequestBuilder.newBuilderWithSource(image_uri).build();
             DraweeController controller = Fresco.newDraweeControllerBuilder()
+                    .setTapToRetryEnabled(true)
                     .setImageRequest(request)
                     .setOldController(holder.postImage.getController())
                     .build();

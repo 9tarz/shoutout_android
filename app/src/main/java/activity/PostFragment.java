@@ -3,8 +3,13 @@ package activity;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -15,19 +20,33 @@ import android.support.v4.app.FragmentTransaction;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.NetworkResponse;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.example.nullnil.shoutout.R;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import app.AppConfig;
@@ -51,6 +70,23 @@ public class PostFragment extends Fragment {
     private CheckBox isAnonymous;
     private int is_anonymous;
 
+    private ImageView imgPreview ;
+    private Button btnCapturePicture, btnRecordVideo;
+    private Uri fileUri;
+    public static final int MEDIA_TYPE_IMAGE = 1;
+    private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
+    private static final String IMAGE_DIRECTORY_NAME = "/res";
+    private String filePath = null;
+    private TextView txtPercentage;
+    long totalSize = 0;
+
+    private final String twoHyphens = "--";
+    private final String lineEnd = "\r\n";
+    private final String boundary = "apiclient-" + System.currentTimeMillis();
+    private final String mimeType = "multipart/form-data;boundary=" + boundary;
+    private byte[] multipartBody;
+
+
     public PostFragment() {
         // Required empty public constructor
     }
@@ -73,6 +109,29 @@ public class PostFragment extends Fragment {
         buttonShout.setEnabled(false);
         countWords = (TextView) rootView.findViewById(R.id.count);
         isAnonymous = (CheckBox) rootView.findViewById(R.id.checkBox);
+
+        // ==================== camera =====================
+        imgPreview = (ImageView) rootView.findViewById(R.id.imgPreview);
+        btnCapturePicture = (Button) rootView.findViewById(R.id.btnCapturePicture);
+        btnCapturePicture.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                // capture picture
+                captureImage();
+            }
+        });
+        // Checking camera availability
+        if (!isDeviceSupportCamera()) {
+            Toast.makeText(getActivity().getApplicationContext(),
+                    "Sorry! Your device doesn't support camera",
+                    Toast.LENGTH_LONG).show();
+            // will close the app if the device does't have camera
+            getActivity().finish();
+        }
+
+        // ==================== /camera =====================
+
         // ================ defect character ================//
         text.addTextChangedListener(new TextWatcher() {
             @Override
@@ -103,6 +162,7 @@ public class PostFragment extends Fragment {
         });
         Log.d(TAG, "count : "+"");
         // ================================================== //
+
         buttonShout.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View view) {
@@ -111,7 +171,101 @@ public class PostFragment extends Fragment {
                 String tag = "req_post";
                 is_anonymous = (isAnonymous.isChecked()) ? 1 : 0;
 
-                StringRequest strReqPost = new StringRequest(Request.Method.POST,
+                BitmapFactory.Options options = new BitmapFactory.Options();
+
+                // downsizing image as it throws OutOfMemory Exception for larger
+                // images
+                options.inSampleSize = 4;
+
+                Boolean has_image = false;
+                byte[] fileImage = null;
+
+                if (fileUri != null) {
+                    Bitmap bitmap = BitmapFactory.decodeFile(fileUri.getPath(), options);
+
+                    ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+                    fileImage = byteArrayOutputStream.toByteArray();
+                    has_image = true;
+                }
+
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                DataOutputStream dos = new DataOutputStream(bos);
+                try {
+                    // the first file
+                    // test
+                    Log.d(TAG, "token : " + token);
+                    Log.d(TAG, "text : " + text.getText().toString());
+                    Log.d(TAG, "latitude : " + Double.toString(latitude));
+                    Log.d(TAG, "longitude : " + Double.toString(longitude));
+                    Log.d(TAG, "is anonymous : " + Integer.toString(is_anonymous));
+                    //
+                    if (has_image) {
+                        buildPart(dos, fileImage, "upload_image.jpg");
+                    }
+                    buildTextPart(dos, "token", token);
+                    buildTextUTFPart(dos, "text", text.getText().toString());
+                    buildTextPart(dos, "longitude",String.format("%.6f", longitude) );
+                    buildTextPart(dos, "latitude",String.format("%.6f", latitude) );
+                    buildTextPart(dos, "is_anonymous", Integer.toString(is_anonymous) );
+
+                    // send multipart form data necesssary after file data
+                    dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+                    // pass to multipart body
+                    multipartBody = bos.toByteArray();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                MultipartRequest multipartRequest = new MultipartRequest(AppConfig.URL_POST, null, mimeType, multipartBody, new Response.Listener<NetworkResponse>() {
+                    @Override
+                    public void onResponse(NetworkResponse response) {
+
+                        try {
+                            String jsonString = new String(response.data);
+
+                            JSONObject jObj = new JSONObject(jsonString);
+                            int intError = jObj.getInt("error");
+                            boolean error = (intError > 0) ? true : false;
+
+                            if (!error) {
+                                Toast.makeText(PostFragment.this.getContext(),
+                                        "Complete SHOUT !", Toast.LENGTH_SHORT).show();
+                                Fragment backFragment = new TimeLineFragment();
+                                FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                                transaction.replace(R.id.container_body, backFragment);
+                                transaction.addToBackStack(null);
+                                Bundle bundle = new Bundle();
+                                double[] LatLong = {latitude, longitude};
+                                bundle.putDoubleArray("pickLatLng", LatLong);
+                                backFragment.setArguments(bundle);
+                                transaction.commit();
+
+                            } else {
+
+                                // Error in login. Get the error message
+                                String errorMsg = jObj.getString("error_msg");
+                                Toast.makeText(PostFragment.this.getContext(),
+                                        errorMsg, Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            // JSON error
+                            e.printStackTrace();
+                            Toast.makeText(PostFragment.this.getContext(), "Json error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+
+                        //Toast.makeText(PostFragment.this.getContext(), "Upload successfully!", Toast.LENGTH_SHORT).show();
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(PostFragment.this.getContext(), "Upload failed!\r\n" + error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+                multipartRequest.setRetryPolicy(new DefaultRetryPolicy(1000 * 60, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                        DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
+                /*StringRequest strReqPost = new StringRequest(Request.Method.POST,
                         AppConfig.URL_POST, new Response.Listener<String>() {
 
                     @Override
@@ -181,14 +335,235 @@ public class PostFragment extends Fragment {
                         return params;
                     }
 
-                };
+                }; */
 
-                AppController.getInstance().addToRequestQueue(strReqPost, tag);
+                //AppController.getInstance().addToRequestQueue(strReqPost, tag);
+                AppController.getInstance().addToRequestQueue(multipartRequest, tag);
+
             }
 
         });
         return rootView ;
     }
+
+    public static int calculateInSampleSize(
+            BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight
+                    && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+
+        return inSampleSize;
+    }
+
+    private void buildTextPart(DataOutputStream dataOutputStream, String parameterName, String parameterValue) throws IOException {
+        dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
+        dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"" + parameterName + "\"" + lineEnd);
+        //dataOutputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + lineEnd);
+        dataOutputStream.writeBytes(lineEnd);
+        dataOutputStream.writeBytes(parameterValue + lineEnd);
+    }
+
+    private void buildTextUTFPart(DataOutputStream dataOutputStream, String parameterName, String parameterValue) throws IOException {
+        dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
+        dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"" + parameterName + "\"" + lineEnd);
+        //dataOutputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + lineEnd);
+        dataOutputStream.writeBytes(lineEnd);
+        dataOutputStream.writeUTF(parameterValue + lineEnd);
+    }
+
+    private void buildPart(DataOutputStream dataOutputStream, byte[] fileData, String fileName) throws IOException {
+        dataOutputStream.writeBytes(twoHyphens + boundary + lineEnd);
+        dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"image\"; filename=\""
+                + fileName + "\"" + lineEnd);
+        dataOutputStream.writeBytes(lineEnd);
+
+        ByteArrayInputStream fileInputStream = new ByteArrayInputStream(fileData);
+        int bytesAvailable = fileInputStream.available();
+
+        int maxBufferSize = 1024 * 1024;
+        int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+        byte[] buffer = new byte[bufferSize];
+
+        // read file and write it into form...
+        int bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+        while (bytesRead > 0) {
+            dataOutputStream.write(buffer, 0, bufferSize);
+            bytesAvailable = fileInputStream.available();
+            bufferSize = Math.min(bytesAvailable, maxBufferSize);
+            bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+        }
+
+        dataOutputStream.writeBytes(lineEnd);
+    }
+
+    // ======================== camera =====================
+    private boolean isDeviceSupportCamera() {
+        if (getActivity().getApplicationContext().getPackageManager().hasSystemFeature(
+
+                PackageManager.FEATURE_CAMERA)) {
+            // this device has a camera
+            return true;
+        } else {
+            // no camera on this device
+            return false;
+        }
+    }
+
+    /**
+     * Capturing Camera Image will lauch camera app request image capture
+     */
+    private void captureImage() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE);
+
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+
+        // start the image capture Intent
+        startActivityForResult(intent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
+    }
+
+    /**
+     * Here we store the file url as it will be null after returning from camera
+     * app
+     */
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // save file url in bundle as it will be null on scren orientation
+        // changes
+        outState.putParcelable("file_uri", fileUri);
+    }
+
+    /*@Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        // get the file url
+        fileUri = savedInstanceState.getParcelable("file_uri");
+    }
+    */
+    private void previewCapturedImage() {
+        try {
+            // hide video preview
+            //videoPreview.setVisibility(View.GONE);
+
+            imgPreview.setVisibility(View.VISIBLE);
+
+            // bimatp factory
+            BitmapFactory.Options options = new BitmapFactory.Options();
+
+            // downsizing image as it throws OutOfMemory Exception for larger
+            // images
+            options.inSampleSize = calculateInSampleSize(options, 350, 350);
+
+            final Bitmap bitmap = BitmapFactory.decodeFile(fileUri.getPath(),
+                    options);
+
+            imgPreview.setImageBitmap(bitmap);
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // if the result is capturing Image
+        if (requestCode == CAMERA_CAPTURE_IMAGE_REQUEST_CODE) {
+            if (resultCode == getActivity().RESULT_OK) {
+                // successfully captured the image
+                // display it in image view
+                previewCapturedImage();
+            } else if (resultCode == getActivity().RESULT_CANCELED) {
+                // user cancelled Image capture
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "User cancelled image capture", Toast.LENGTH_SHORT)
+                        .show();
+            } else {
+                // failed to capture image
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "Sorry! Failed to capture image", Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }
+        /*else if (requestCode == CAMERA_CAPTURE_VIDEO_REQUEST_CODE) {
+            if (resultCode == getActivity().RESULT_OK) {
+                // video successfully recorded
+                // preview the recorded video
+                previewVideo();
+            } else if (resultCode == RESULT_CANCELED) {
+                // user cancelled recording
+                Toast.makeText(getApplicationContext(),
+                        "User cancelled video recording", Toast.LENGTH_SHORT)
+                        .show();
+            } else {
+                // failed to record video
+                Toast.makeText(getApplicationContext(),
+                        "Sorry! Failed to record video", Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }
+        */
+    }
+    private static Uri getOutputMediaFileUri(int type){
+        File fileToReturn =  getOutputMediaFile(type);
+        return  fileToReturn!=null?Uri.fromFile(fileToReturn):
+                null;
+    }
+    private static File getOutputMediaFile(int type) {
+
+        // External sdcard location
+        File mediaStorageDir = new File(
+                Environment
+                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+                IMAGE_DIRECTORY_NAME);
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d(IMAGE_DIRECTORY_NAME, "Oops! Failed create "
+                        + IMAGE_DIRECTORY_NAME + " directory");
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
+                Locale.getDefault()).format(new Date());
+        File mediaFile;
+        if (type == MEDIA_TYPE_IMAGE) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                    + "IMG_" + timeStamp + ".jpg");
+        }
+        /* else if (type == MEDIA_TYPE_VIDEO) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                    + "VID_" + timeStamp + ".mp4");
+        }
+         */
+        else {
+            return null;
+        }
+
+        return mediaFile;
+    }
+
+    // ======================== /camera ====================
 
 
     private void showDialog() {
@@ -212,5 +587,59 @@ public class PostFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+}
+
+
+class MultipartRequest extends Request<NetworkResponse> {
+    private final Response.Listener<NetworkResponse> mListener;
+    private final Response.ErrorListener mErrorListener;
+    private final Map<String, String> mHeaders;
+    private final String mMimeType;
+    private final byte[] mMultipartBody;
+
+    public MultipartRequest(String url, Map<String, String> headers, String mimeType, byte[] multipartBody, Response.Listener<NetworkResponse> listener, Response.ErrorListener errorListener) {
+        super(Method.POST, url, errorListener);
+        this.mListener = listener;
+        this.mErrorListener = errorListener;
+        this.mHeaders = headers;
+        this.mMimeType = mimeType;
+        this.mMultipartBody = multipartBody;
+    }
+
+    @Override
+    public Map<String, String> getHeaders() throws AuthFailureError {
+        return (mHeaders != null) ? mHeaders : super.getHeaders();
+    }
+
+    @Override
+    public String getBodyContentType() {
+        return mMimeType;
+    }
+
+    @Override
+    public byte[] getBody() throws AuthFailureError {
+        return mMultipartBody;
+    }
+
+    @Override
+    protected Response<NetworkResponse> parseNetworkResponse(NetworkResponse response) {
+        try {
+            return Response.success(
+                    response,
+                    HttpHeaderParser.parseCacheHeaders(response));
+        } catch (Exception e) {
+            return Response.error(new ParseError(e));
+        }
+    }
+
+    @Override
+    protected void deliverResponse(NetworkResponse response) {
+        mListener.onResponse(response);
+    }
+
+    @Override
+    public void deliverError(VolleyError error) {
+        mErrorListener.onErrorResponse(error);
     }
 }
