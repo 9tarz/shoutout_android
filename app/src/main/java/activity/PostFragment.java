@@ -32,6 +32,7 @@ import java.util.Map;
 
 import app.AppConfig;
 import app.AppController;
+import helper.AnonymousManager;
 import helper.SessionManager;
 import android.text.TextWatcher;
 import android.text.Editable;
@@ -43,6 +44,7 @@ public class PostFragment extends Fragment {
     private Button buttonShout ;
     private EditText text ;
     private SessionManager session;
+    private AnonymousManager anonymousDefault;
     private ProgressDialog dialog , pDialog;
     private double latitude , longitude ;
     private TextView countWords;
@@ -61,6 +63,9 @@ public class PostFragment extends Fragment {
         Bundle bundle = this.getArguments();
         latitude = bundle.getDoubleArray("pickLatLng")[0];
         longitude = bundle.getDoubleArray("pickLatLng")[1];
+        anonymousDefault = new AnonymousManager(PostFragment.this.getContext());
+
+
 
     }
 
@@ -73,6 +78,8 @@ public class PostFragment extends Fragment {
         buttonShout.setEnabled(false);
         countWords = (TextView) rootView.findViewById(R.id.count);
         isAnonymous = (CheckBox) rootView.findViewById(R.id.checkBox);
+        Boolean defValue = (anonymousDefault.getDefault()==1) ? true : false;
+        isAnonymous.setChecked(defValue);
         // ================ defect character ================//
         text.addTextChangedListener(new TextWatcher() {
             @Override
@@ -92,8 +99,7 @@ public class PostFragment extends Fragment {
                 checkCounts = 140 - text.getText().length();
                 if (checkCounts == 140) {
                     buttonShout.setEnabled(false);
-                }
-                else{
+                } else {
                     buttonShout.setEnabled(true);
                 }
                 count = String.valueOf(checkCounts);
@@ -102,6 +108,7 @@ public class PostFragment extends Fragment {
             }
         });
         Log.d(TAG, "count : "+"");
+
         // ================================================== //
         buttonShout.setOnClickListener(new View.OnClickListener() {
 
@@ -134,6 +141,7 @@ public class PostFragment extends Fragment {
                                 bundle.putDoubleArray("pickLatLng", LatLong);
                                 backFragment.setArguments(bundle);
                                 transaction.commit();
+                                anonymousDefault.setDefault(is_anonymous);
 
                             } else {
 
