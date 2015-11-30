@@ -15,4 +15,5 @@ public class AppConfig {
     public static String URL_FETCHPOSTS = "http://www.sakkawa.com/api/post/location";
 
     public static String URL_POST = "http://www.sakkawa.com/api/post/shout";
+
 }

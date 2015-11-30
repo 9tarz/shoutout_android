@@ -11,7 +11,7 @@
         android:id="@+id/editText_postText"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:hint="What's on yout mind ?"
+        android:hint="What's on your mind ?"
         android:padding="10dp"
         android:textColor="@color/black"
         android:textColorHint="#cfcfcf"
@@ -20,22 +20,21 @@
         android:layout_alignParentStart="true"
         android:maxLength="140"
         android:layout_marginTop="15dp" />
-<!--
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp">
-        <EditText
-            android:id="@+id/username"
-            android:layout_width="match_parent"
+    <!--
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:inputType="textVisiblePassword|textNoSuggestions"
-            android:hint="@string/hint_username" />
-    </android.support.design.widget.TextInputLayout>
-
-    -->
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+            <EditText
+                android:id="@+id/username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:inputType="textVisiblePassword|textNoSuggestions"
+                android:hint="@string/hint_username" />
+        </android.support.design.widget.TextInputLayout>
+        -->
 
 
     <Button
@@ -58,5 +57,47 @@
         android:id="@+id/count"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
+    <TextView
+        android:id="@+id/txtPercentage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="15dp"
+        android:textSize="30dp" />
+
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:id="@+id/imgPreview"
+        android:layout_above="@+id/button_shout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="48dp" />
+
+
+    <Button
+        android:id="@+id/btnCapturePicture"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="Take a Picture"
+        android:layout_below="@+id/editText_postText"
+        android:layout_centerHorizontal="true" />
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="Choose Image"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/btnCapturePicture"
+        android:id="@+id/buttonChoose" />
+
+    <EditText
+        android:id="@+id/editText"
+        android:hint="Enter a Name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/txtPercentage"
+        android:layout_toEndOf="@+id/txtPercentage"
+        android:layout_below="@+id/buttonChoose" />
+
 
 </RelativeLayout>
