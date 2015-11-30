@@ -26,6 +26,7 @@ import app.AppConfig;
 import app.AppController;
 //import info.androidhive.loginandregistration.helper.SQLiteHandler;
 import helper.SessionManager;
+import helper.AnonymousManager;
 
 public class LoginActivity extends Activity {
     private static final String TAG = RegisterActivity.class.getSimpleName();
@@ -35,6 +36,7 @@ public class LoginActivity extends Activity {
     private EditText inputPassword;
     private ProgressDialog pDialog;
     private SessionManager session;
+    private AnonymousManager anonymousDefault;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -52,6 +54,9 @@ public class LoginActivity extends Activity {
 
         // Session manager
         session = new SessionManager(getApplicationContext());
+
+        // Anonymous manager
+        anonymousDefault = new AnonymousManager(getApplicationContext());
 
         // Check if user is already logged in or not
         if (session.isLoggedIn()) {
@@ -123,6 +128,8 @@ public class LoginActivity extends Activity {
                         // user successfully logged in
                         // Create login session
                         session.setLogin(true);
+
+                        anonymousDefault.setDefault(0);
 
                         // Now store the user in SQLite
                         String token = jObj.getString("token");

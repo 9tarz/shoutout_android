@@ -57,6 +57,7 @@ import java.util.Map;
 import app.AppConfig;
 import app.AppController;
 import helper.SessionManager;
+import helper.AnonymousManager;
 import android.text.TextWatcher;
 import android.text.Editable;
 
@@ -67,7 +68,9 @@ public class PostFragment extends Fragment {
     private Button buttonShout ;
     private EditText text ;
     private SessionManager session;
-    private ProgressDialog dialog , pDialog;
+    private AnonymousManager anonymousDefault;
+
+    private ProgressDialog pDialog;
     private double latitude , longitude ;
     private TextView countWords;
     private String count ;
@@ -103,6 +106,7 @@ public class PostFragment extends Fragment {
         Bundle bundle = this.getArguments();
         latitude = bundle.getDoubleArray("pickLatLng")[0];
         longitude = bundle.getDoubleArray("pickLatLng")[1];
+        anonymousDefault = new AnonymousManager(PostFragment.this.getContext());
 
     }
 
@@ -115,6 +119,8 @@ public class PostFragment extends Fragment {
         buttonShout.setEnabled(false);
         countWords = (TextView) rootView.findViewById(R.id.count);
         isAnonymous = (CheckBox) rootView.findViewById(R.id.checkBox);
+        Boolean defValue = (anonymousDefault.getDefault()==1) ? true : false;
+        isAnonymous.setChecked(defValue);
 
         pDialog = new ProgressDialog(PostFragment.this.getContext());
         pDialog.setCancelable(false);
@@ -256,6 +262,7 @@ public class PostFragment extends Fragment {
                                 bundle.putDoubleArray("pickLatLng", LatLong);
                                 backFragment.setArguments(bundle);
                                 transaction.commit();
+                                anonymousDefault.setDefault(is_anonymous);
 
                             } else {
 
