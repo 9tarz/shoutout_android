@@ -6,6 +6,7 @@ package adapter;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,14 +50,24 @@ public class SwipeListAdapter extends RecyclerView.Adapter<SwipeListAdapter.View
         holder.text.setText(post.text);
         holder.username.setText(post.username);
         holder.timestamp.setReferenceTime(post.timestamp);
-        Uri image_uri = Uri.parse(post.image_url);
+
+        String fileName = post.image_url.substring(post.image_url.lastIndexOf('/') + 1);
+        String fileNameArray[] = fileName.split("\\.");
+        String fileExtension = fileNameArray[fileNameArray.length-1];
+        String lowResURL = "http://i.imgur.com/" + fileName + "m" + fileExtension;
+
         if (!post.image_url.equals("null")) {
-            ImageRequest request = ImageRequestBuilder.newBuilderWithSource(image_uri).build();
+            //ImageRequest lowResUri = ImageRequestBuilder.newBuilderWithSource(image_uri).build();
+            //ImageRequest highResUri = ImageRequestBuilder.newBuilderWithSource(image_uri).build();
+            Uri lowResUri = Uri.parse(lowResURL);
+            Uri highResUri = Uri.parse(post.image_url);
             DraweeController controller = Fresco.newDraweeControllerBuilder()
                     .setTapToRetryEnabled(true)
-                    .setImageRequest(request)
+                    .setLowResImageRequest(ImageRequest.fromUri(lowResUri))
+                    .setImageRequest(ImageRequest.fromUri(highResUri))
                     .setOldController(holder.postImage.getController())
                     .build();
+
             holder.postImage.setController(controller);
             holder.postImage.setVisibility(View.VISIBLE);
         } else {
