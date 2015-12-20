@@ -90,7 +90,7 @@ public class PostFragment extends Fragment {
     private Uri fileUri;
     public static final int MEDIA_TYPE_IMAGE = 1;
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
-    private static final String IMAGE_DIRECTORY_NAME = "/res";
+    private static final String IMAGE_DIRECTORY_NAME = "/Shoutout";
     private String filePath = null;
     private TextView txtPercentage;
     long totalSize = 0;
