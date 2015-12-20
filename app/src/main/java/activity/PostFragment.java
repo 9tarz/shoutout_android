@@ -25,7 +25,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,7 +38,13 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 
 import com.example.nullnil.shoutout.R;
+import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
+import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.facebook.imagepipeline.common.ResizeOptions;
+import com.facebook.imagepipeline.request.ImageRequest;
+import com.facebook.imagepipeline.request.ImageRequestBuilder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,8 +82,7 @@ public class PostFragment extends Fragment {
     private CheckBox isAnonymous;
     private int is_anonymous;
 
-    private ImageView imgPreview ;
-    private Button btnCapturePicture, btnRecordVideo;
+    private Button btnCapturePicture;
     private Uri fileUri;
     public static final int MEDIA_TYPE_IMAGE = 1;
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
@@ -301,80 +305,6 @@ public class PostFragment extends Fragment {
                 });
                 multipartRequest.setRetryPolicy(new DefaultRetryPolicy(1000 * 60, DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
                         DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-
-                /*StringRequest strReqPost = new StringRequest(Request.Method.POST,
-                        AppConfig.URL_POST, new Response.Listener<String>() {
-
-                    @Override
-                    public void onResponse(String response) {
-
-                        try {
-                            JSONObject jObj = new JSONObject(response);
-                            int intError = jObj.getInt("error");
-                            boolean error = (intError > 0) ? true : false;
-
-                            if (!error) {
-                                Toast.makeText(PostFragment.this.getContext(),
-                                        "Complete SHOUT !", Toast.LENGTH_SHORT).show();
-                                Fragment backFragment = new TimeLineFragment();
-                                FragmentTransaction transaction = getFragmentManager().beginTransaction();
-                                transaction.replace(R.id.container_body, backFragment);
-                                transaction.addToBackStack(null);
-                                Bundle bundle = new Bundle();
-                                double[] LatLong = {latitude, longitude};
-                                bundle.putDoubleArray("pickLatLng", LatLong);
-                                backFragment.setArguments(bundle);
-                                transaction.commit();
-
-                            } else {
-
-                                // Error in login. Get the error message
-                                String errorMsg = jObj.getString("error_msg");
-                                Toast.makeText(PostFragment.this.getContext(),
-                                        errorMsg, Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (JSONException e) {
-                            // JSON error
-                            e.printStackTrace();
-                            Toast.makeText(PostFragment.this.getContext(), "Json error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        //Log.e(TAG, "Login Error: " + error.getMessage());
-                        Toast.makeText(PostFragment.this.getContext(),
-                                error.getMessage(), Toast.LENGTH_SHORT).show();
-                        hideDialog();
-                    }
-                }) {
-
-                    @Override
-                    protected Map<String, String> getParams() {
-                        // test
-                        Log.d(TAG, "token : " + token);
-                        Log.d(TAG, "text : " + text.getText().toString());
-                        Log.d(TAG, "latitude : " + Double.toString(latitude));
-                        Log.d(TAG, "longitude : " + Double.toString(longitude));
-                        Log.d(TAG, "is anonymous : " + Integer.toString(is_anonymous));
-                        //
-
-                        // Posting parameters to post url
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("token", token); // token
-                        params.put("text", text.getText().toString()); // text
-                        params.put("longitude", String.format("%.6f", longitude)); // logitude
-                        params.put("latitude", String.format("%.6f", latitude)); // latitude
-                        params.put("is_anonymous", Integer.toString(is_anonymous));
-
-                        return params;
-                    }
-
-                }; */
-
-                //AppController.getInstance().addToRequestQueue(strReqPost, tag);
                 AppController.getInstance().addToRequestQueue(multipartRequest, tag);
 
             }
@@ -531,9 +461,20 @@ public class PostFragment extends Fragment {
         try {
             Log.d(TAG, "fileUri  : " + fileUri);
             Log.d(TAG, "path of fileUri  : " + fileUri.getPath());
-            Log.d(TAG, "Real chooser path :"+realPath);
+            Log.d(TAG, "Real chooser path :" + realPath);
+
+            int width = 1080, height = 1080;
+            ImageRequest request = ImageRequestBuilder.newBuilderWithSource(fileUri)
+                    .setResizeOptions(new ResizeOptions(width, height))
+                    .build();
+            PipelineDraweeController controller = (PipelineDraweeController) Fresco.newDraweeControllerBuilder()
+                    .setOldController(previewImage.getController())
+                    .setImageRequest(request)
+                    .build();
+
+            previewImage.setController(controller);
             previewImage.setVisibility(View.VISIBLE);
-            previewImage.setImageURI(fileUri);
+            //previewImage.setImageURI(fileUri);
         } catch (NullPointerException e) {
             e.printStackTrace();
         }
@@ -560,25 +501,7 @@ public class PostFragment extends Fragment {
                         .show();
             }
         }
-        /*else if (requestCode == CAMERA_CAPTURE_VIDEO_REQUEST_CODE) {
-            if (resultCode == getActivity().RESULT_OK) {
-                // video successfully recorded
-                // preview the recorded video
-                previewVideo();
-            } else if (resultCode == RESULT_CANCELED) {
-                // user cancelled recording
-                Toast.makeText(getApplicationContext(),
-                        "User cancelled video recording", Toast.LENGTH_SHORT)
-                        .show();
-            } else {
-                // failed to record video
-                Toast.makeText(getApplicationContext(),
-                        "Sorry! Failed to record video", Toast.LENGTH_SHORT)
-                        .show();
-            }
-        }
-        */
-        //
+
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == getActivity().RESULT_OK ) {
 
             // SDK < API11
@@ -594,25 +517,6 @@ public class PostFragment extends Fragment {
                 realPath = getRealPathFromURI_API19(getActivity(), data.getData());
             fileUri = data.getData();
             previewCapturedImage();
-           /* if (resultCode == getActivity().RESULT_OK) {
-                // successfully captured the image
-                // display it in image view
-                //Getting the Bitmap from Gallery
-                fileUri = data.getData();
-                previewCapturedImage();
-            } else if (resultCode == getActivity().RESULT_CANCELED) {
-                // user cancelled Image capture
-                Toast.makeText(getActivity().getApplicationContext(),
-                        "User cancelled image capture", Toast.LENGTH_SHORT)
-                        .show();
-            } else {
-                // failed to capture image
-                Toast.makeText(getActivity().getApplicationContext(),
-                        "Sorry! Failed to capture image", Toast.LENGTH_SHORT)
-                        .show();
-            }
-        */
-
         }
     }
     @SuppressLint("NewApi")
