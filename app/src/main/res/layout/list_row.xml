@@ -17,44 +17,42 @@
         android:id="@+id/text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="left"
         android:layout_toRightOf="@+id/profile"
-        android:layout_marginRight="10dp"
-        android:layout_above="@+id/image"
         android:textSize="16sp"
         android:textStyle="bold"  />
-
-    <com.facebook.drawee.view.SimpleDraweeView
-        android:id="@+id/image"
-        fresco:fadeDuration="300"
-        android:layout_width="350dp"
-        android:layout_height="350dp"
-        android:layout_below="@+id/profile"
-        android:layout_centerHorizontal="true" />
+    <TextView
+        android:id="@+id/username"
+        android:layout_below="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="left"
+        android:layout_toRightOf="@+id/profile"
+        android:textSize="14sp"
+        />
 
     <ImageView
         android:id="@+id/whitespace"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/profile"
+        android:layout_toRightOf="@+id/username"
         android:layout_centerHorizontal="true" />
-
-    <TextView
-        android:id="@+id/username"
-        android:layout_below="@+id/whitespace"
-        android:layout_alignLeft="@+id/text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:layout_marginBottom="10dp"/>
 
     <com.github.curioustechizen.ago.RelativeTimeTextView
         android:id="@+id/timestamp"
-        android:layout_below="@+id/whitespace"
-        android:layout_marginLeft="10dp"
-        android:layout_toRightOf="@+id/username"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
+        android:layout_below="@+id/text"
+        android:gravity="right"
+        android:layout_toRightOf="@+id/username"
         app:relative_time_prefix="" />
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:layout_marginTop="10dp"
+        android:id="@+id/image"
+        fresco:fadeDuration="300"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
+        android:layout_below="@+id/timestamp" />
 
 </RelativeLayout>
