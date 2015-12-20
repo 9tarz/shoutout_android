@@ -1,14 +1,20 @@
 package activity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
@@ -34,6 +40,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.StringRequest;
 import com.example.nullnil.shoutout.R;
+import com.facebook.common.file.FileUtils;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -48,6 +55,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,7 +67,6 @@ import java.util.Map;
 import app.AppConfig;
 import app.AppController;
 import helper.SessionManager;
-import helper.AnonymousManager;
 import android.text.TextWatcher;
 import android.text.Editable;
 
@@ -68,9 +77,7 @@ public class PostFragment extends Fragment {
     private Button buttonShout ;
     private EditText text ;
     private SessionManager session;
-    private AnonymousManager anonymousDefault;
-
-    private ProgressDialog pDialog;
+    private ProgressDialog dialog , pDialog;
     private double latitude , longitude ;
     private TextView countWords;
     private String count ;
@@ -94,8 +101,10 @@ public class PostFragment extends Fragment {
     private final String mimeType = "multipart/form-data;boundary=" + boundary;
     private byte[] multipartBody;
     private SimpleDraweeView previewImage;
-
-
+    private int PICK_IMAGE_REQUEST = 1;
+    private Button buttonChoose;
+    String pathfile ;
+    String realPath;
     public PostFragment() {
         // Required empty public constructor
     }
@@ -106,7 +115,6 @@ public class PostFragment extends Fragment {
         Bundle bundle = this.getArguments();
         latitude = bundle.getDoubleArray("pickLatLng")[0];
         longitude = bundle.getDoubleArray("pickLatLng")[1];
-        anonymousDefault = new AnonymousManager(PostFragment.this.getContext());
 
     }
 
@@ -119,8 +127,7 @@ public class PostFragment extends Fragment {
         buttonShout.setEnabled(false);
         countWords = (TextView) rootView.findViewById(R.id.count);
         isAnonymous = (CheckBox) rootView.findViewById(R.id.checkBox);
-        Boolean defValue = (anonymousDefault.getDefault()==1) ? true : false;
-        isAnonymous.setChecked(defValue);
+        buttonChoose = (Button) rootView.findViewById(R.id.buttonChoose);
 
         pDialog = new ProgressDialog(PostFragment.this.getContext());
         pDialog.setCancelable(false);
@@ -137,6 +144,15 @@ public class PostFragment extends Fragment {
                 captureImage();
             }
         });
+        buttonChoose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                showFileChooser();
+
+            }
+        });
+
         // Checking camera availability
         if (!isDeviceSupportCamera()) {
             Toast.makeText(getActivity().getApplicationContext(),
@@ -199,8 +215,14 @@ public class PostFragment extends Fragment {
 
                 if (fileUri != null) {
                     pDialog.setMessage("Uploading image ...");
-                    Bitmap bitmap = BitmapFactory.decodeFile(fileUri.getPath(), options);
+                    pathfile = fileUri.getPath();
+                    if (realPath != null)
+                        pathfile = realPath ;
+                    Log.d(TAG, "path file photo : "+pathfile);
+                    // repair select //
 
+                    // ============= //
+                    Bitmap bitmap = BitmapFactory.decodeFile(pathfile, options);
                     ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
                     fileImage = byteArrayOutputStream.toByteArray();
@@ -262,7 +284,6 @@ public class PostFragment extends Fragment {
                                 bundle.putDoubleArray("pickLatLng", LatLong);
                                 backFragment.setArguments(bundle);
                                 transaction.commit();
-                                anonymousDefault.setDefault(is_anonymous);
 
                             } else {
 
@@ -462,6 +483,13 @@ public class PostFragment extends Fragment {
         startActivityForResult(intent, CAMERA_CAPTURE_IMAGE_REQUEST_CODE);
     }
 
+    private void showFileChooser() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+    }
+
     /**
      * Here we store the file url as it will be null after returning from camera
      * app
@@ -509,6 +537,9 @@ public class PostFragment extends Fragment {
 
     private void previewCapturedImage() {
         try {
+            Log.d(TAG, "fileUri  : " + fileUri);
+            Log.d(TAG, "path of fileUri  : " + fileUri.getPath());
+            Log.d(TAG, "Real chooser path :"+realPath);
             previewImage.setVisibility(View.VISIBLE);
             previewImage.setImageURI(fileUri);
         } catch (NullPointerException e) {
@@ -555,6 +586,95 @@ public class PostFragment extends Fragment {
             }
         }
         */
+        //
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == getActivity().RESULT_OK ) {
+
+            // SDK < API11
+            if (Build.VERSION.SDK_INT < 11)
+                realPath = getRealPathFromURI_BelowAPI11(getActivity(), data.getData());
+
+                // SDK >= 11 && SDK < 19
+            else if (Build.VERSION.SDK_INT < 19)
+                realPath = getRealPathFromURI_API11to18(getActivity(), data.getData());
+
+                // SDK > 19 (Android 4.4)
+            else
+                realPath = getRealPathFromURI_API19(getActivity(), data.getData());
+            fileUri = data.getData();
+            previewCapturedImage();
+           /* if (resultCode == getActivity().RESULT_OK) {
+                // successfully captured the image
+                // display it in image view
+                //Getting the Bitmap from Gallery
+                fileUri = data.getData();
+                previewCapturedImage();
+            } else if (resultCode == getActivity().RESULT_CANCELED) {
+                // user cancelled Image capture
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "User cancelled image capture", Toast.LENGTH_SHORT)
+                        .show();
+            } else {
+                // failed to capture image
+                Toast.makeText(getActivity().getApplicationContext(),
+                        "Sorry! Failed to capture image", Toast.LENGTH_SHORT)
+                        .show();
+            }
+        */
+
+        }
+    }
+    @SuppressLint("NewApi")
+    public static String getRealPathFromURI_API19(Context context, Uri uri){
+        String filePath = "";
+        String wholeID = DocumentsContract.getDocumentId(uri);
+
+        // Split at colon, use second item in the array
+        String id = wholeID.split(":")[1];
+
+        String[] column = { MediaStore.Images.Media.DATA };
+
+        // where id is equal to
+        String sel = MediaStore.Images.Media._ID + "=?";
+
+        Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                column, sel, new String[]{ id }, null);
+
+        int columnIndex = cursor.getColumnIndex(column[0]);
+
+        if (cursor.moveToFirst()) {
+            filePath = cursor.getString(columnIndex);
+        }
+        cursor.close();
+        return filePath;
+    }
+
+
+    @SuppressLint("NewApi")
+    public static String getRealPathFromURI_API11to18(Context context, Uri contentUri) {
+        String[] proj = { MediaStore.Images.Media.DATA };
+        String result = null;
+
+        CursorLoader cursorLoader = new CursorLoader(
+                context,
+                contentUri, proj, null, null, null);
+        Cursor cursor = cursorLoader.loadInBackground();
+
+        if(cursor != null){
+            int column_index =
+                    cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            result = cursor.getString(column_index);
+        }
+        return result;
+    }
+
+    public static String getRealPathFromURI_BelowAPI11(Context context, Uri contentUri){
+        String[] proj = { MediaStore.Images.Media.DATA };
+        Cursor cursor = context.getContentResolver().query(contentUri, proj, null, null, null);
+        int column_index
+                = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        return cursor.getString(column_index);
     }
     private static Uri getOutputMediaFileUri(int type){
         File fileToReturn =  getOutputMediaFile(type);
