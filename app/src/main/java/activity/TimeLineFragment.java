@@ -21,7 +21,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.example.nullnil.shoutout.R;
+import com.saoapp.shoutout.R;
 import com.facebook.drawee.backends.pipeline.Fresco;
 
 import org.json.JSONArray;

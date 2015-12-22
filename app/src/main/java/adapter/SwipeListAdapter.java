@@ -14,12 +14,11 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import com.example.nullnil.shoutout.R;
+import com.saoapp.shoutout.R;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.request.ImageRequest;
-import com.facebook.imagepipeline.request.ImageRequestBuilder;
 import com.github.curioustechizen.ago.RelativeTimeTextView;
 
 import helper.Post;

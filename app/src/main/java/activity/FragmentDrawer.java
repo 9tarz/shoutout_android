@@ -16,7 +16,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.nullnil.shoutout.R;
+import com.saoapp.shoutout.R;
 import adapter.NavigationDrawerAdapter;
 import model.NavDrawerItem;
 import java.util.ArrayList;

@@ -1,6 +1,6 @@
 package adapter;
 import model.NavDrawerItem;
-import com.example.nullnil.shoutout.R;
+import com.saoapp.shoutout.R;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;

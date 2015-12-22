@@ -21,10 +21,9 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.example.nullnil.shoutout.R;
+import com.saoapp.shoutout.R;
 import app.AppConfig;
 import app.AppController;
-//import info.androidhive.loginandregistration.helper.SQLiteHandler;
 import helper.SessionManager;
 import helper.AnonymousManager;
 
