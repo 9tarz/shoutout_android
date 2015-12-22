@@ -37,10 +37,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 
-import com.example.nullnil.shoutout.R;
+import com.saoapp.shoutout.R;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.backends.pipeline.PipelineDraweeController;
-import com.facebook.drawee.interfaces.DraweeController;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.facebook.imagepipeline.common.ResizeOptions;
 import com.facebook.imagepipeline.request.ImageRequest;
@@ -462,10 +461,8 @@ public class PostFragment extends Fragment {
             Log.d(TAG, "fileUri  : " + fileUri);
             Log.d(TAG, "path of fileUri  : " + fileUri.getPath());
             Log.d(TAG, "Real chooser path :" + realPath);
-
-            int width = 1080, height = 1080;
             ImageRequest request = ImageRequestBuilder.newBuilderWithSource(fileUri)
-                    .setResizeOptions(new ResizeOptions(width, height))
+                    .setResizeOptions(new ResizeOptions(previewImage.getWidth(), previewImage.getHeight()))
                     .build();
             PipelineDraweeController controller = (PipelineDraweeController) Fresco.newDraweeControllerBuilder()
                     .setOldController(previewImage.getController())
