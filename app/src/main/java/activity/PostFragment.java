@@ -244,9 +244,9 @@ public class PostFragment extends Fragment {
                     }
                     buildTextPart(dos, "token", token);
                     buildTextUTFPart(dos, "text", text.getText().toString());
-                    buildTextPart(dos, "longitude",String.format("%.6f", longitude) );
+                    buildTextPart(dos, "longitude", String.format("%.6f", longitude));
                     buildTextPart(dos, "latitude",String.format("%.6f", latitude) );
-                    buildTextPart(dos, "is_anonymous", Integer.toString(is_anonymous) );
+                    buildTextPart(dos, "is_anonymous", Integer.toString(is_anonymous));
 
                     // send multipart form data necesssary after file data
                     dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
@@ -348,7 +348,9 @@ public class PostFragment extends Fragment {
         dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"" + parameterName + "\"" + lineEnd);
         //dataOutputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + lineEnd);
         dataOutputStream.writeBytes(lineEnd);
-        dataOutputStream.writeUTF(parameterValue + lineEnd);
+        byte[] b = parameterValue.getBytes("utf-8");
+        dataOutputStream.write(b);
+        dataOutputStream.writeBytes(lineEnd);
     }
 
     private void buildPart(DataOutputStream dataOutputStream, byte[] fileData, String fileName) throws IOException {
