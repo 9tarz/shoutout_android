@@ -82,7 +82,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
      */
-    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 180000;
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
     /**
      * Constant used in the location settings dialog.
      */
