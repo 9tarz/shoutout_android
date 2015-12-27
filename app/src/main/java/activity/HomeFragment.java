@@ -12,6 +12,12 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.saoapp.shoutout.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.maps.GoogleMap;
@@ -56,15 +62,14 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         LocationSource,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        GoogleMap.OnMarkerClickListener
+        GoogleMap.OnMarkerClickListener,
+        ResultCallback<LocationSettingsResult>
         {
 
     private static final String TAG = HomeFragment.class.getSimpleName();
     private GoogleApiClient mGoogleApiClient;
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private LocationRequest mLocationRequest;
-    private static final long INTERVAL = 1000;
-    private static final long FASTEST_INTERVAL = 1000;
     private static final float MINIMUM_ACCURACY = 50.0f;
     private static final float RADIUS = 1000;
 
@@ -74,8 +79,20 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
     private Location location;
     private Circle circleMap;
     private OnLocationChangedListener mapLocationListener = null;
-
-            public HomeFragment() {
+    /**
+     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
+     */
+    public static final long UPDATE_INTERVAL_IN_MILLISECONDS = 180000;
+    /**
+     * Constant used in the location settings dialog.
+     */
+    protected static final int REQUEST_CHECK_SETTINGS = 0x1;
+    /**
+     * Stores the types of location services the client is interested in using. Used for checking
+     * settings to determine if the device has optimal location settings.
+     */
+    protected LocationSettingsRequest mLocationSettingsRequest;
+    public HomeFragment() {
         // Required empty public constructor
     }
 
@@ -90,8 +107,10 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
 
         mLocationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(INTERVAL)
-                .setFastestInterval(FASTEST_INTERVAL);
+                .setInterval(UPDATE_INTERVAL_IN_MILLISECONDS)
+                .setFastestInterval(UPDATE_INTERVAL_IN_MILLISECONDS/2);
+        buildLocationSettingsRequest();
+        checkLocationSettings();
     }
 
     @Override
@@ -110,6 +129,56 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         }
 
         return rootView;
+    }
+    /**
+     * Uses a {@link com.google.android.gms.location.LocationSettingsRequest.Builder} to build
+     * a {@link com.google.android.gms.location.LocationSettingsRequest} that is used for checking
+     * if a device has the needed location settings.
+     */
+    protected void buildLocationSettingsRequest() {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(mLocationRequest);
+        mLocationSettingsRequest = builder.build();
+    }
+
+    /**
+     * Check if the device's location settings are adequate for the app's needs using the
+     * {@link com.google.android.gms.location.SettingsApi#checkLocationSettings(GoogleApiClient,
+     * LocationSettingsRequest)} method, with the results provided through a {@code PendingResult}.
+     */
+    protected void checkLocationSettings() {
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(
+                        mGoogleApiClient,
+                        mLocationSettingsRequest
+                );
+        result.setResultCallback(this);
+    }
+    @Override
+    public void onResult(LocationSettingsResult locationSettingsResult) {
+        final Status status = locationSettingsResult.getStatus();
+        switch (status.getStatusCode()) {
+            case LocationSettingsStatusCodes.SUCCESS:
+                Log.i(TAG, "All location settings are satisfied.");
+                startLocationUpdates();
+                break;
+            case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                Log.i(TAG, "Location settings are not satisfied. Show the user a dialog to" +
+                        "upgrade location settings ");
+
+                try {
+                    // Show the dialog by calling startResolutionForResult(), and check the result
+                    // in onActivityResult().
+                    status.startResolutionForResult(this.getActivity(), REQUEST_CHECK_SETTINGS);
+                } catch (IntentSender.SendIntentException e) {
+                    Log.i(TAG, "PendingIntent unable to execute request.");
+                }
+                break;
+            case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                Log.i(TAG, "Location settings are inadequate, and cannot be fixed here. Dialog " +
+                        "not created.");
+                break;
+        }
     }
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -157,7 +226,8 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         ((ActionBarActivity) this.getActivity()).getSupportActionBar().setTitle("Look Around");
         mGoogleApiClient.connect();
         if (mGoogleApiClient.isConnected()) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            //LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            startLocationUpdates();
         }
         mapView.onResume();
     }
@@ -172,7 +242,21 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         super.onLowMemory();
         mapView.onLowMemory();
     }
+    /**
+     * Requests location updates from the FusedLocationApi.
+     */
+    protected void startLocationUpdates() {
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient,
+                mLocationRequest,
+                this
+        ).setResultCallback(new ResultCallback<Status>() {
+            @Override
+            public void onResult(Status status) {
+            }
+        });
 
+    }
     @Override
     public void onConnected(Bundle bundle) {
         Log.i(TAG, "Location services connected.");
@@ -180,7 +264,8 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         if (lastLocation != null) {
             this.location = lastLocation;
         } else {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            //LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+            startLocationUpdates();
         }
         if(circleMap != null) {
             circleMap.remove();
@@ -237,8 +322,13 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
         if (this.mapLocationListener != null) {
             this.mapLocationListener.onLocationChanged(location);
         }
-        this.location = location;
-        handleNewLocation(this.location);
+        /* if (location.getAccuracy() < MINIMUM_ACCURACY) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+        } else {
+        */
+            //startLocationUpdates();
+            this.location = location;
+            handleNewLocation(this.location);
         /*if (null == this.location || location.getAccuracy() < this.location.getAccuracy()) {
             this.location = location;
             circleMap.remove();
@@ -249,7 +339,7 @@ public class HomeFragment extends Fragment implements OnMapClickListener,
             }
         }*/
 
-        map.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(this.location.getLatitude(), this.location.getLongitude())));
+            map.animateCamera(CameraUpdateFactory.newLatLng(new LatLng(this.location.getLatitude(), this.location.getLongitude())));
     }
     @Override
     public void activate(OnLocationChangedListener listener) {
